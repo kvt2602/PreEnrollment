@@ -124,10 +124,13 @@ Defines which courses should be grouped together
 
 ```bash
 # Connect to MySQL and run:
-mysql -u root -p enrollment_db < database/migration_add_batches.sql
+Legacy note: this migration SQL has been removed from the active codebase.
+Use the current schema instead:
+
+mysql -u root -p pre_enrolment < backend/db/init.sql
 ```
 
-Or manually execute the SQL in [migration_add_batches.sql](database/migration_add_batches.sql)
+The old migration SQL file is no longer part of the active project setup.
 
 ### 2. API Endpoints
 
@@ -304,7 +307,7 @@ import PasswordReset from './components/PasswordReset';
 
 ### Batches Not Creating
 1. Verify `class_batches` table exists
-2. Check `migration_add_batches.sql` was executed
+2. Check `backend/db/init.sql` was executed
 3. Ensure `batch_id` column exists in `enrollments`
 
 ### Password Reset Not Working
