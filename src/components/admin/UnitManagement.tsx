@@ -53,48 +53,48 @@ export function UnitManagement({ units, enrollments }: UnitManagementProps) {
     <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-[#d9e2ec] bg-white/95 shadow-sm">
+        <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-[#2a9d8f]" />
+              <TrendingUp className="h-4 w-4 text-green-600" />
               High Demand Units
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-[#2a9d8f]">{highDemand.length}</div>
+            <div className="text-3xl font-bold text-green-600">{highDemand.length}</div>
             <p className="text-xs text-muted-foreground mt-1">Above average enrollment</p>
           </CardContent>
         </Card>
 
-        <Card className="border-[#d9e2ec] bg-white/95 shadow-sm">
+        <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <TrendingDown className="h-4 w-4 text-[#b7791f]" />
+              <TrendingDown className="h-4 w-4 text-orange-600" />
               Medium Demand Units
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-[#b7791f]">{lowDemand.length}</div>
+            <div className="text-3xl font-bold text-orange-600">{lowDemand.length}</div>
             <p className="text-xs text-muted-foreground mt-1">Below average enrollment</p>
           </CardContent>
         </Card>
 
-        <Card className="border-[#d9e2ec] bg-white/95 shadow-sm">
+        <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <TrendingDown className="h-4 w-4 text-[#c53030]" />
+              <TrendingDown className="h-4 w-4 text-red-600" />
               Low Demand Units
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-[#c53030]">{noDemand.length}</div>
+            <div className="text-3xl font-bold text-red-600">{noDemand.length}</div>
             <p className="text-xs text-muted-foreground mt-1">No enrollments yet</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Unit List */}
-      <Card className="border-[#d9e2ec] bg-white/95 shadow-sm">
+      <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -108,9 +108,8 @@ export function UnitManagement({ units, enrollments }: UnitManagementProps) {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="rounded-lg border border-[#d9e2ec] overflow-hidden">
           <Table>
-            <TableHeader className="bg-[#f0f4f8]">
+            <TableHeader>
               <TableRow>
                 <TableHead>Unit Code</TableHead>
                 <TableHead>Unit Name</TableHead>
@@ -127,7 +126,7 @@ export function UnitManagement({ units, enrollments }: UnitManagementProps) {
                                   demandLevel === 'medium' ? 'bg-orange-600' : 'bg-red-600';
                 
                 return (
-                  <TableRow key={unit.id} className="hover:bg-[#f8fbff]">
+                  <TableRow key={unit.id}>
                     <TableCell>
                       <Badge variant="outline" className="font-mono">{unit.unitCode}</Badge>
                     </TableCell>
@@ -136,7 +135,7 @@ export function UnitManagement({ units, enrollments }: UnitManagementProps) {
                       <Badge variant="secondary">{unit.semester || 'N/A'}</Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge className="bg-[#0f4c81]">{unit.enrollmentCount}</Badge>
+                      <Badge className="bg-blue-600">{unit.enrollmentCount}</Badge>
                     </TableCell>
                     <TableCell>
                       <Badge className={badgeColor}>
@@ -148,7 +147,6 @@ export function UnitManagement({ units, enrollments }: UnitManagementProps) {
               })}
             </TableBody>
           </Table>
-          </div>
         </CardContent>
       </Card>
     </div>

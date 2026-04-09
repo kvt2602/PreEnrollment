@@ -63,7 +63,7 @@ export function StudentManagement({ students, enrollments, units }: StudentManag
   };
 
   return (
-    <Card className="border-[#d9e2ec] bg-white/95 shadow-sm">
+    <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -79,20 +79,20 @@ export function StudentManagement({ students, enrollments, units }: StudentManag
       <CardContent>
         <div className="space-y-4">
           {/* Search */}
-          <div className="flex items-center gap-2 rounded-lg border border-[#d9e2ec] bg-[#f8fbff] px-3 py-2">
-            <Search className="h-4 w-4 text-[#486581]" />
+          <div className="flex items-center gap-2">
+            <Search className="h-4 w-4 text-gray-500" />
             <Input
               placeholder="Search by name, email, or CIHE ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-md border-0 shadow-none bg-transparent"
+              className="max-w-md"
             />
           </div>
           
           {/* Student Table */}
-          <div className="border border-[#d9e2ec] rounded-lg overflow-hidden">
+          <div className="border rounded-lg">
             <Table>
-              <TableHeader className="bg-[#f0f4f8]">
+              <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>CIHE ID</TableHead>
@@ -105,14 +105,14 @@ export function StudentManagement({ students, enrollments, units }: StudentManag
                 {filteredStudents.map((student) => {
                   const studentEnrollments = getStudentEnrollments(student.email);
                   return (
-                    <TableRow key={student.email} className="hover:bg-[#f8fbff]">
+                    <TableRow key={student.email}>
                       <TableCell className="font-medium">{student.name}</TableCell>
                       <TableCell>
                         <Badge variant="outline">{student.ciheId}</Badge>
                       </TableCell>
-                      <TableCell className="text-sm text-[#486581]">{student.email}</TableCell>
+                      <TableCell className="text-sm text-gray-600">{student.email}</TableCell>
                       <TableCell>
-                        <Badge className="bg-[#0f4c81]">{studentEnrollments.length}</Badge>
+                        <Badge className="bg-blue-600">{studentEnrollments.length}</Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
