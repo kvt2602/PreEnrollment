@@ -106,9 +106,6 @@ Client-side `cihe_user` in browser localStorage is only used to remember the cur
   DetailedReportsTab.tsx        - Advanced reporting for admins
 /utils/
    mockApi.ts                    - Frontend API client for Node backend
-  supabase/info.tsx            - Supabase credentials (for future use)
-/supabase/functions/server/
-  index.tsx                     - Edge Function (ready for deployment)
 ```
 
 ---

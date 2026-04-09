@@ -18,7 +18,6 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [students, setStudents] = useState<any[]>([]);
   const [units, setUnits] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
 
   useEffect(() => {
@@ -26,7 +25,6 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
   }, []);
 
   const fetchData = async () => {
-    setLoading(true);
     try {
       // Fetch all enrollments (previously called preferences)
       const preferencesData = await mockApi.getAllPreferences();
@@ -41,8 +39,6 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
       setUnits(coursesData.courses || []);
     } catch (error) {
       console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
