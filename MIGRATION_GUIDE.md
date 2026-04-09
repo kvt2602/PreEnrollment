@@ -6,7 +6,15 @@
 
 ```bash
 cd c:\xampp\htdocs\PreEnrollment\database
-mysql -u root enrollment_db < migration_add_batches.sql
+This guide is now legacy-only.
+
+The active schema for this project is:
+
+`backend/db/init.sql`
+
+Use:
+
+`mysql -u root pre_enrolment < backend/db/init.sql`
 ```
 
 ### Option B: Using phpMyAdmin
