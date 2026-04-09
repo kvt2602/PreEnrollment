@@ -1,0 +1,60 @@
+/* Login & Authentication Styles */
+
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.login-box {
+  background: white;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  width: 100%;
+}
+
+.login-box h1 {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.login-box h2 {
+  font-size: 1.2rem;
+  color: var(--dark-color);
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.login-box .form-group {
+  margin-bottom: 15px;
+}
+
+.login-box input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.login-box button[type="submit"] {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.login-box .text-center {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.login-box .text-center p {
+  color: var(--text-color);
+  font-size: 0.9rem;
+}
