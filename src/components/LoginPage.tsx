@@ -105,7 +105,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             />
           </div>
           <h1 className="text-blue-900 mb-2">CIHE Pre-Enrolment System</h1>
-          <p className="text-gray-600">Course Investment & Higher Education</p>
+          <p className="text-gray-600">Crown Institute of Higher Education</p>
         </div>
 
         <Card>
