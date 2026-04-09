@@ -201,7 +201,7 @@ export function StudentDashboard({ user, onLogout }: StudentDashboardProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#f6f9fc] via-[#eef4fb] to-[#e8f1fb]">
       {/* Dashboard Header */}
       <DashboardHeader user={user} onLogout={onLogout} />
 
@@ -209,25 +209,25 @@ export function StudentDashboard({ user, onLogout }: StudentDashboardProps) {
       <main className="container mx-auto px-4 py-8">
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <Card>
+          <Card className="border-[#d9e2ec] bg-white/95 shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle>Total Preferences</CardTitle>
-              <BookOpen className="h-5 w-5 text-blue-600" />
+              <CardTitle className="text-[#102a43]">Total Preferences</CardTitle>
+              <BookOpen className="h-5 w-5 text-[#0f4c81]" />
             </CardHeader>
             <CardContent>
-              <div className="text-blue-900">{preferences.length}</div>
-              <p className="text-gray-500 mt-1">Course recommendations submitted</p>
+              <div className="text-[#102a43]">{preferences.length}</div>
+              <p className="text-[#486581] mt-1">Course recommendations submitted</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-[#d9e2ec] bg-white/95 shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle>Available Courses</CardTitle>
-              <BookOpen className="h-5 w-5 text-green-600" />
+              <CardTitle className="text-[#102a43]">Available Courses</CardTitle>
+              <BookOpen className="h-5 w-5 text-[#2a9d8f]" />
             </CardHeader>
             <CardContent>
-              <div className="text-green-700">{courses.length}</div>
-              <p className="text-gray-500 mt-1">Courses to choose from</p>
+              <div className="text-[#2a9d8f]">{courses.length}</div>
+              <p className="text-[#486581] mt-1">Courses to choose from</p>
             </CardContent>
           </Card>
         </div>
@@ -298,8 +298,8 @@ export function StudentDashboard({ user, onLogout }: StudentDashboardProps) {
                   {selectedCourse && (() => {
                     const course = AVAILABLE_COURSES.find(c => c.unitCode === selectedCourse);
                     return course && course.prerequisite ? (
-                      <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mt-2">
-                        <p className="text-sm text-blue-900">
+                      <div className="bg-[#eef4fb] border border-[#d9e2ec] rounded-md p-3 mt-2">
+                        <p className="text-sm text-[#102a43]">
                           <span className="font-semibold">Pre-requisite:</span> {course.prerequisite}
                         </p>
                       </div>

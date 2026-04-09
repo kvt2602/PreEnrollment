@@ -81,15 +81,15 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#f6f9fc] via-[#eef4fb] to-[#e8f1fb] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Info Banner */}
-        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+        <div className="mb-4 p-3 bg-[#e8f6f3] border border-[#b7e4dc] rounded-lg">
           <div className="flex items-start gap-2">
-            <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+            <CheckCircle className="h-5 w-5 text-[#2a9d8f] mt-0.5" />
             <div>
-              <p className="text-green-900 font-medium">System Running with Node.js + MySQL</p>
-              <p className="text-green-700 text-sm mt-1">
+              <p className="text-[#102a43] font-medium">System Running with Node.js + MySQL</p>
+              <p className="text-[#486581] text-sm mt-1">
                 Data is persisted in MySQL through the Node.js API.
               </p>
             </div>
@@ -98,22 +98,22 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="bg-blue-600 p-4 rounded-full">
+            <div className="bg-[#0f4c81] p-4 rounded-full shadow-md shadow-[#0f4c81]/20">
               <GraduationCap className="h-12 w-12 text-white" />
             </div>
           </div>
-          <h1 className="text-blue-900 mb-2">CIHE Pre-Enrolment System</h1>
-          <p className="text-gray-600">Course Investment & Higher Education</p>
+          <h1 className="text-[#102a43] mb-2">CIHE Pre-Enrolment System</h1>
+          <p className="text-[#486581]">Course Investment & Higher Education</p>
         </div>
 
-        <Card>
+        <Card className="bg-white border border-[#d9e2ec] shadow-lg shadow-[#102a43]/5">
           <CardHeader>
-            <CardTitle>Welcome</CardTitle>
-            <CardDescription>Sign in to access your dashboard</CardDescription>
+            <CardTitle className="text-[#102a43]">Welcome</CardTitle>
+            <CardDescription className="text-[#486581]">Sign in to access your dashboard</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-2 bg-[#f0f4f8]">
                 <TabsTrigger value="login">Login</TabsTrigger>
                 <TabsTrigger value="register">Register</TabsTrigger>
               </TabsList>
@@ -151,16 +151,16 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                     </Alert>
                   )}
 
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button type="submit" className="w-full bg-[#0f4c81] hover:bg-[#0b3b63] text-white" disabled={loading}>
                     {loading ? 'Signing in...' : 'Sign In'}
                   </Button>
 
-                  <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                    <p className="text-blue-900 mb-2">Demo Accounts:</p>
+                  <div className="mt-4 p-3 bg-[#eef4fb] border border-[#d9e2ec] rounded-md">
+                    <p className="text-[#102a43] mb-2">Demo Accounts:</p>
                     <div className="space-y-1">
-                      <p className="text-blue-800"><strong>Student:</strong> student@cihe.edu / student123</p>
-                      <p className="text-blue-800"><strong>Other Students:</strong> sarah@cihe.edu, michael@cihe.edu, emma@cihe.edu (all use: student123)</p>
-                      <p className="text-blue-800"><strong>Admin:</strong> admin@cihe.edu / admin123</p>
+                      <p className="text-[#334e68]"><strong>Student:</strong> student@cihe.edu / student123</p>
+                      <p className="text-[#334e68]"><strong>Other Students:</strong> sarah@cihe.edu, michael@cihe.edu, emma@cihe.edu (all use: student123)</p>
+                      <p className="text-[#334e68]"><strong>Admin:</strong> admin@cihe.edu / admin123</p>
                     </div>
                   </div>
                 </form>
@@ -225,7 +225,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                     </Alert>
                   )}
 
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button type="submit" className="w-full bg-[#0f4c81] hover:bg-[#0b3b63] text-white" disabled={loading}>
                     {loading ? 'Creating account...' : 'Create Account'}
                   </Button>
                 </form>

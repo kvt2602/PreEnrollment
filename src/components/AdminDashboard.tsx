@@ -47,13 +47,13 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#f6f9fc] via-[#eef4fb] to-[#e8f1fb]">
       <DashboardHeader user={user} onLogout={onLogout} />
 
       <div className="max-w-7xl mx-auto p-6">
         <div className="mb-6">
-          <h1 className="text-gray-900 mb-2">Admin Portal</h1>
-          <p className="text-gray-600">
+          <h1 className="text-[#102a43] mb-2">Admin Portal</h1>
+          <p className="text-[#486581]">
             Manage students, units, and generate comprehensive enrollment reports
           </p>
         </div>
