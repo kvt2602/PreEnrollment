@@ -91,52 +91,52 @@ export function DashboardOverview({ students, units, enrollments }: DashboardOve
     <div className="space-y-6">
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-[#d9e2ec] bg-white/95 shadow-sm">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-            <Users className="h-4 w-4 text-[#486581]" />
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#102a43]">{totalStudents}</div>
+            <div className="text-2xl font-bold">{totalStudents}</div>
             <p className="text-xs text-muted-foreground">
               Registered in the system
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-[#d9e2ec] bg-white/95 shadow-sm">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Units</CardTitle>
-            <BookOpen className="h-4 w-4 text-[#486581]" />
+            <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#102a43]">{totalUnits}</div>
+            <div className="text-2xl font-bold">{totalUnits}</div>
             <p className="text-xs text-muted-foreground">
               Available courses
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-[#d9e2ec] bg-white/95 shadow-sm">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Enrollments</CardTitle>
-            <Calendar className="h-4 w-4 text-[#486581]" />
+            <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#102a43]">{totalEnrollments}</div>
+            <div className="text-2xl font-bold">{totalEnrollments}</div>
             <p className="text-xs text-muted-foreground">
               Student-unit combinations
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-[#d9e2ec] bg-white/95 shadow-sm">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Possible Clashes</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-[#b7791f]" />
+            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#102a43]">{totalClashes}</div>
+            <div className="text-2xl font-bold">{totalClashes}</div>
             <p className="text-xs text-muted-foreground">
               Time slot conflicts detected
             </p>
@@ -146,44 +146,44 @@ export function DashboardOverview({ students, units, enrollments }: DashboardOve
 
       {/* Student Distribution */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="border-[#d9e2ec] bg-white/95 shadow-sm">
+        <Card>
           <CardHeader>
             <CardTitle>Student Unit Distribution</CardTitle>
             <CardDescription>Students grouped by number of units enrolled</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-[#eef4fb] border border-[#d9e2ec] rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <div className="flex items-center gap-3">
-                  <div className="bg-[#0f4c81] p-2 rounded">
+                  <div className="bg-blue-600 p-2 rounded">
                     <Users className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <p className="font-medium text-[#102a43]">Students with 1 Unit</p>
-                    <p className="text-sm text-[#486581]">Taking single course</p>
+                    <p className="font-medium text-gray-900">Students with 1 Unit</p>
+                    <p className="text-sm text-gray-600">Taking single course</p>
                   </div>
                 </div>
-                <Badge className="bg-[#0f4c81] text-xl px-4 py-2">{studentsWith1Unit}</Badge>
+                <Badge className="bg-blue-600 text-xl px-4 py-2">{studentsWith1Unit}</Badge>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-[#e8f6f3] border border-[#b7e4dc] rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
                 <div className="flex items-center gap-3">
-                  <div className="bg-[#2a9d8f] p-2 rounded">
+                  <div className="bg-green-600 p-2 rounded">
                     <TrendingUp className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <p className="font-medium text-[#102a43]">Students with 2+ Units</p>
-                    <p className="text-sm text-[#486581]">Multiple course enrollments</p>
+                    <p className="font-medium text-gray-900">Students with 2+ Units</p>
+                    <p className="text-sm text-gray-600">Multiple course enrollments</p>
                   </div>
                 </div>
-                <Badge className="bg-[#2a9d8f] text-xl px-4 py-2">{studentsWith2PlusUnits}</Badge>
+                <Badge className="bg-green-600 text-xl px-4 py-2">{studentsWith2PlusUnits}</Badge>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Quick Insights */}
-        <Card className="border-[#d9e2ec] bg-white/95 shadow-sm">
+        <Card>
           <CardHeader>
             <CardTitle>Quick Insights</CardTitle>
             <CardDescription>High overlap units and scheduling recommendations</CardDescription>

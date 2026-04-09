@@ -327,7 +327,7 @@ export function ReportsModule({ students, units, enrollments }: ReportsModulePro
 
   return (
     <div className="space-y-6">
-      <Card className="border-[#d9e2ec] bg-white/95 shadow-sm">
+      <Card>
         <CardHeader>
           <CardTitle>Reports Module</CardTitle>
           <CardDescription>Generate and export comprehensive enrollment reports</CardDescription>
@@ -335,10 +335,10 @@ export function ReportsModule({ students, units, enrollments }: ReportsModulePro
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Report 1 */}
-            <Card className="border border-[#d9e2ec] bg-white shadow-sm">
+            <Card className="border-2">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2 mb-2">
-                  <FileText className="h-5 w-5 text-[#0f4c81]" />
+                  <FileText className="h-5 w-5 text-blue-600" />
                   <CardTitle className="text-base">Student Enrollment Report</CardTitle>
                 </div>
                 <CardDescription className="text-sm">
@@ -347,12 +347,12 @@ export function ReportsModule({ students, units, enrollments }: ReportsModulePro
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="text-sm text-[#486581]">
+                  <div className="text-sm text-gray-600">
                     <p>• Student details</p>
                     <p>• Units enrolled per student</p>
                     <p>• Total unit count</p>
                   </div>
-                  <Button onClick={exportStudentEnrollmentReport} className="w-full bg-[#0f4c81] hover:bg-[#0b3b63]" size="sm">
+                  <Button onClick={exportStudentEnrollmentReport} className="w-full" size="sm">
                     <Download className="h-4 w-4 mr-2" />
                     Export Report
                   </Button>
@@ -361,10 +361,10 @@ export function ReportsModule({ students, units, enrollments }: ReportsModulePro
             </Card>
 
             {/* Report 2 */}
-            <Card className="border border-[#d9e2ec] bg-white shadow-sm">
+            <Card className="border-2">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2 mb-2">
-                  <Users className="h-5 w-5 text-[#2a9d8f]" />
+                  <Users className="h-5 w-5 text-green-600" />
                   <CardTitle className="text-base">Students with Multiple Units</CardTitle>
                 </div>
                 <CardDescription className="text-sm">
@@ -374,10 +374,10 @@ export function ReportsModule({ students, units, enrollments }: ReportsModulePro
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-[#486581]">Total Students:</span>
-                    <Badge className="bg-[#2a9d8f]">{studentsWithMultipleUnits.length}</Badge>
+                    <span className="text-sm text-gray-600">Total Students:</span>
+                    <Badge className="bg-green-600">{studentsWithMultipleUnits.length}</Badge>
                   </div>
-                  <Button onClick={exportMultipleUnitsReport} className="w-full bg-[#0f4c81] hover:bg-[#0b3b63]" size="sm">
+                  <Button onClick={exportMultipleUnitsReport} className="w-full" size="sm">
                     <Download className="h-4 w-4 mr-2" />
                     Export Report
                   </Button>
@@ -386,10 +386,10 @@ export function ReportsModule({ students, units, enrollments }: ReportsModulePro
             </Card>
 
             {/* Report 3 */}
-            <Card className="border border-[#d9e2ec] bg-white shadow-sm">
+            <Card className="border-2">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="h-5 w-5 text-[#b7791f]" />
+                  <TrendingUp className="h-5 w-5 text-orange-600" />
                   <CardTitle className="text-base">Unit Popularity Report</CardTitle>
                 </div>
                 <CardDescription className="text-sm">
@@ -398,7 +398,7 @@ export function ReportsModule({ students, units, enrollments }: ReportsModulePro
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="text-sm text-[#486581]">
+                  <div className="text-sm text-gray-600">
                     <p className="font-medium">Top 3 Units:</p>
                     {unitStats.slice(0, 3).map((unit, idx) => (
                       <p key={idx}>
@@ -406,7 +406,7 @@ export function ReportsModule({ students, units, enrollments }: ReportsModulePro
                       </p>
                     ))}
                   </div>
-                  <Button onClick={exportUnitPopularityReport} className="w-full bg-[#0f4c81] hover:bg-[#0b3b63]" size="sm">
+                  <Button onClick={exportUnitPopularityReport} className="w-full" size="sm">
                     <Download className="h-4 w-4 mr-2" />
                     Export Report
                   </Button>
@@ -416,14 +416,13 @@ export function ReportsModule({ students, units, enrollments }: ReportsModulePro
           </div>
 
           {/* Quick Preview */}
-          <Card className="mt-6 border border-[#d9e2ec] bg-[#f8fbff]">
+          <Card className="mt-6 border-2 border-blue-200 bg-blue-50">
             <CardHeader>
               <CardTitle className="text-base">Quick Preview: Top Enrolled Units</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="rounded-lg border border-[#d9e2ec] overflow-hidden bg-white">
               <Table>
-                <TableHeader className="bg-[#f0f4f8]">
+                <TableHeader>
                   <TableRow>
                     <TableHead className="w-12">Rank</TableHead>
                     <TableHead>Unit Code</TableHead>
@@ -433,20 +432,19 @@ export function ReportsModule({ students, units, enrollments }: ReportsModulePro
                 </TableHeader>
                 <TableBody>
                   {unitStats.slice(0, 5).map((unit, index) => (
-                    <TableRow key={unit.id} className="hover:bg-[#f8fbff]">
+                    <TableRow key={unit.id}>
                       <TableCell className="font-medium">#{index + 1}</TableCell>
                       <TableCell>
                         <Badge variant="outline">{unit.unitCode}</Badge>
                       </TableCell>
                       <TableCell className="text-sm">{unit.name}</TableCell>
                       <TableCell>
-                        <Badge className="bg-[#0f4c81]">{unit.count}</Badge>
+                        <Badge className="bg-blue-600">{unit.count}</Badge>
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
-              </div>
             </CardContent>
           </Card>
         </CardContent>

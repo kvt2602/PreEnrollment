@@ -8,8 +8,6 @@ import { UnitManagement } from './admin/UnitManagement';
 import { ReportsModule } from './admin/ReportsModule';
 import { UnitOverlapMatrix } from './admin/UnitOverlapMatrix';
 import { OverlapInsights } from './admin/OverlapInsights';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { BarChart3, BookOpen, Grid3x3, LayoutDashboard, Sparkles, Users } from 'lucide-react';
 
 interface AdminDashboardProps {
   user: any;
@@ -22,16 +20,6 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
   const [units, setUnits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
-
-  const pendingCount = enrollments.filter((e) => e.status === 'pending').length;
-
-  const conflictCount = enrollments.reduce((total, current) => {
-    const sameStudent = enrollments.filter((e) => e.studentEmail === current.studentEmail);
-    const overlap = sameStudent.filter(
-      (e) => e.id !== current.id && e.dayPreference === current.dayPreference && e.timePreference === current.timePreference
-    );
-    return total + (overlap.length > 0 ? 1 : 0);
-  }, 0);
 
   useEffect(() => {
     fetchData();
@@ -59,93 +47,25 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f6f9fc] via-[#eef4fb] to-[#e8f1fb]">
+    <div className="min-h-screen bg-gray-50">
       <DashboardHeader user={user} onLogout={onLogout} />
 
       <div className="max-w-7xl mx-auto p-6">
         <div className="mb-6">
-          <h1 className="text-[#102a43] mb-2">Admin Portal</h1>
-          <p className="text-[#486581]">
+          <h1 className="text-gray-900 mb-2">Admin Portal</h1>
+          <p className="text-gray-600">
             Manage students, units, and generate comprehensive enrollment reports
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-          <Card className="border-[#d9e2ec] bg-white/95 shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-[#486581] font-medium">Total Students</CardTitle>
-            </CardHeader>
-            <CardContent className="flex items-center justify-between">
-              <p className="text-3xl font-semibold text-[#102a43]">{students.length}</p>
-              <div className="h-10 w-10 rounded-lg bg-[#eef4fb] grid place-items-center">
-                <Users className="h-5 w-5 text-[#0f4c81]" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-[#d9e2ec] bg-white/95 shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-[#486581] font-medium">Total Units</CardTitle>
-            </CardHeader>
-            <CardContent className="flex items-center justify-between">
-              <p className="text-3xl font-semibold text-[#102a43]">{units.length}</p>
-              <div className="h-10 w-10 rounded-lg bg-[#eef4fb] grid place-items-center">
-                <BookOpen className="h-5 w-5 text-[#0f4c81]" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-[#d9e2ec] bg-white/95 shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-[#486581] font-medium">Pending Approvals</CardTitle>
-            </CardHeader>
-            <CardContent className="flex items-center justify-between">
-              <p className="text-3xl font-semibold text-[#102a43]">{pendingCount}</p>
-              <div className="h-10 w-10 rounded-lg bg-[#fff7e6] grid place-items-center">
-                <BarChart3 className="h-5 w-5 text-[#b7791f]" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-[#d9e2ec] bg-white/95 shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-[#486581] font-medium">Potential Conflicts</CardTitle>
-            </CardHeader>
-            <CardContent className="flex items-center justify-between">
-              <p className="text-3xl font-semibold text-[#102a43]">{conflictCount}</p>
-              <div className="h-10 w-10 rounded-lg bg-[#fef2f2] grid place-items-center">
-                <Sparkles className="h-5 w-5 text-[#c53030]" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6 h-auto gap-2 bg-transparent p-0">
-            <TabsTrigger value="dashboard" className="border border-[#d9e2ec] data-[state=active]:bg-[#0f4c81] data-[state=active]:text-white rounded-md">
-              <LayoutDashboard className="h-4 w-4 mr-2" />
-              Dashboard
-            </TabsTrigger>
-            <TabsTrigger value="students" className="border border-[#d9e2ec] data-[state=active]:bg-[#0f4c81] data-[state=active]:text-white rounded-md">
-              <Users className="h-4 w-4 mr-2" />
-              Students
-            </TabsTrigger>
-            <TabsTrigger value="units" className="border border-[#d9e2ec] data-[state=active]:bg-[#0f4c81] data-[state=active]:text-white rounded-md">
-              <BookOpen className="h-4 w-4 mr-2" />
-              Units
-            </TabsTrigger>
-            <TabsTrigger value="reports" className="border border-[#d9e2ec] data-[state=active]:bg-[#0f4c81] data-[state=active]:text-white rounded-md">
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Reports
-            </TabsTrigger>
-            <TabsTrigger value="overlap" className="border border-[#d9e2ec] data-[state=active]:bg-[#0f4c81] data-[state=active]:text-white rounded-md">
-              <Grid3x3 className="h-4 w-4 mr-2" />
-              Overlap Matrix
-            </TabsTrigger>
-            <TabsTrigger value="insights" className="border border-[#d9e2ec] data-[state=active]:bg-[#0f4c81] data-[state=active]:text-white rounded-md">
-              <Sparkles className="h-4 w-4 mr-2" />
-              Insights
-            </TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="students">Students</TabsTrigger>
+            <TabsTrigger value="units">Units</TabsTrigger>
+            <TabsTrigger value="reports">Reports</TabsTrigger>
+            <TabsTrigger value="overlap">Overlap Matrix</TabsTrigger>
+            <TabsTrigger value="insights">Insights</TabsTrigger>
           </TabsList>
 
           {/* Dashboard Tab */}
