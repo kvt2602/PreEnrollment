@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { Download, AlertTriangle, Info } from 'lucide-react';
+import { Download, AlertTriangle, Info, BookOpen, Users, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface UnitOverlapMatrixProps {
@@ -50,7 +50,20 @@ export function UnitOverlapMatrix({ units, enrollments, students }: UnitOverlapM
   };
   
   const matrix = calculateOverlapMatrix();
-  
+
+  // Overlap summary stats
+  const uniqueStudentCount = new Set(enrollments.map(e => e.studentEmail)).size;
+  const unitIds = units.map(u => u.id);
+  const pairCounts: number[] = [];
+  for (let i = 0; i < unitIds.length; i++) {
+    for (let j = i + 1; j < unitIds.length; j++) {
+      const count = (matrix[unitIds[i]]?.[unitIds[j]] as Set<string> | undefined)?.size ?? 0;
+      if (count > 0) pairCounts.push(count);
+    }
+  }
+  const highOverlapPairs = pairCounts.filter(c => c >= 3).length;
+  const anyOverlapPairs = pairCounts.length;
+
   // Get color based on overlap count
   const getOverlapColor = (count: number, unitA: string, unitB: string) => {
     if (unitA === unitB) return 'bg-gray-800 text-white'; // Diagonal
@@ -170,6 +183,62 @@ export function UnitOverlapMatrix({ units, enrollments, students }: UnitOverlapM
 
   return (
     <div className="space-y-6">
+      {/* Summary stat cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <Card className="border border-slate-200 shadow-sm">
+          <CardContent className="pt-5 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-blue-50 p-2.5">
+                <BookOpen className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Total Units</p>
+                <p className="mt-0.5 text-2xl font-semibold text-slate-900">{units.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border border-slate-200 shadow-sm">
+          <CardContent className="pt-5 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-green-50 p-2.5">
+                <Users className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Students Enrolled</p>
+                <p className="mt-0.5 text-2xl font-semibold text-slate-900">{uniqueStudentCount}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border border-slate-200 shadow-sm">
+          <CardContent className="pt-5 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-orange-50 p-2.5">
+                <TrendingUp className="h-5 w-5 text-orange-600" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Overlapping Pairs</p>
+                <p className="mt-0.5 text-2xl font-semibold text-slate-900">{anyOverlapPairs}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border border-slate-200 shadow-sm">
+          <CardContent className="pt-5 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-red-50 p-2.5">
+                <AlertTriangle className="h-5 w-5 text-red-600" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">High Overlap Pairs</p>
+                <p className="mt-0.5 text-2xl font-semibold text-slate-900">{highOverlapPairs}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">

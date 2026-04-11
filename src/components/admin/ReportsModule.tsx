@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { Download, FileText, Users, Calendar, TrendingUp, Grid } from 'lucide-react';
+import { Download, FileText, Users, Calendar, TrendingUp, Grid, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ReportsModuleProps {
@@ -325,8 +325,70 @@ export function ReportsModule({ students, units, enrollments }: ReportsModulePro
     count: enrollments.filter(e => e.courseId === u.id).length,
   })).sort((a, b) => b.count - a.count);
 
+  // Summary stats for cards
+  const totalStudents = students.length;
+  const totalEnrollments = enrollments.length;
+  const multiUnitCount = studentsWithMultipleUnits.length;
+  const topUnit = unitStats[0]?.unitCode ?? 'N/A';
+
   return (
     <div className="space-y-6">
+      {/* Summary stat cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <Card className="border border-slate-200 shadow-sm">
+          <CardContent className="pt-5 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-blue-50 p-2.5">
+                <Users className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Total Students</p>
+                <p className="mt-0.5 text-2xl font-semibold text-slate-900">{totalStudents}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border border-slate-200 shadow-sm">
+          <CardContent className="pt-5 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-green-50 p-2.5">
+                <FileText className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Total Enrollments</p>
+                <p className="mt-0.5 text-2xl font-semibold text-slate-900">{totalEnrollments}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border border-slate-200 shadow-sm">
+          <CardContent className="pt-5 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-orange-50 p-2.5">
+                <TrendingUp className="h-5 w-5 text-orange-600" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Multi-Unit Students</p>
+                <p className="mt-0.5 text-2xl font-semibold text-slate-900">{multiUnitCount}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border border-slate-200 shadow-sm">
+          <CardContent className="pt-5 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-purple-50 p-2.5">
+                <BookOpen className="h-5 w-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Most Popular Unit</p>
+                <p className="mt-0.5 text-2xl font-semibold text-slate-900">{topUnit}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Reports Module</CardTitle>
