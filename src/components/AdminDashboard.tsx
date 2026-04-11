@@ -43,19 +43,20 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(96,165,250,0.2),_transparent_28%),linear-gradient(135deg,#0f172a_0%,#163b72_45%,#10213e_100%)]">
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:48px_48px] opacity-20" />
       <DashboardHeader user={user} onLogout={onLogout} />
 
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="relative max-w-7xl mx-auto p-6">
         <div className="mb-6">
-          <h1 className="text-gray-900 mb-2">Admin Portal</h1>
-          <p className="text-gray-600">
+          <h1 className="text-white mb-2">Admin Portal</h1>
+          <p className="text-slate-200">
             Manage students, units, and generate comprehensive enrollment reports
           </p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid bg-white/90">
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="students">Students</TabsTrigger>
             <TabsTrigger value="units">Units</TabsTrigger>
