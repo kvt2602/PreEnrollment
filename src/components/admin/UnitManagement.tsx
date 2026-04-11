@@ -1,8 +1,6 @@
-import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { Input } from '../ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Download, TrendingUp, TrendingDown } from 'lucide-react';
 import { toast } from 'sonner';
@@ -24,19 +22,9 @@ export function UnitManagement({ units, enrollments }: UnitManagementProps) {
   
   const avgEnrollment = unitsWithStats.reduce((sum, u) => sum + u.enrollmentCount, 0) / unitsWithStats.length;
   
-  const [searchTerm, setSearchTerm] = useState('');
-
   const highDemand = unitsWithStats.filter(u => u.enrollmentCount > avgEnrollment);
   const lowDemand = unitsWithStats.filter(u => u.enrollmentCount <= avgEnrollment && u.enrollmentCount > 0);
   const noDemand = unitsWithStats.filter(u => u.enrollmentCount === 0);
-
-  const filteredUnitsWithStats = unitsWithStats.filter((unit) => {
-    const query = searchTerm.toLowerCase().trim();
-    return (
-      unit.unitCode.toLowerCase().includes(query) ||
-      unit.name.toLowerCase().includes(query)
-    );
-  });
   
   const exportUnitReport = () => {
     let csvContent = 'CIHE PRE-ENROLMENT SYSTEM - UNIT MANAGEMENT REPORT\\n';
@@ -120,18 +108,6 @@ export function UnitManagement({ units, enrollments }: UnitManagementProps) {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-medium">Search units</p>
-              <p className="text-xs text-slate-500">Filter by unit code or unit name</p>
-            </div>
-            <Input
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Search by code or name..."
-              className="max-w-md"
-            />
-          </div>
           <Table>
             <TableHeader>
               <TableRow>
@@ -143,7 +119,7 @@ export function UnitManagement({ units, enrollments }: UnitManagementProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredUnitsWithStats.map((unit) => {
+              {unitsWithStats.map((unit) => {
                 const demandLevel = unit.enrollmentCount > avgEnrollment ? 'high' : 
                                    unit.enrollmentCount > 0 ? 'medium' : 'low';
                 const badgeColor = demandLevel === 'high' ? 'bg-green-600' :
