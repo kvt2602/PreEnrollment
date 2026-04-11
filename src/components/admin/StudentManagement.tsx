@@ -70,7 +70,11 @@ export function StudentManagement({ students, enrollments, units }: StudentManag
             <CardTitle>Student Management</CardTitle>
             <CardDescription>View and search all registered students</CardDescription>
           </div>
-          <Button onClick={exportStudentList} variant="outline" size="sm">
+          <Button
+            onClick={exportStudentList}
+            className="border border-blue-800/45 bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white hover:brightness-110"
+            size="sm"
+          >
             <Download className="h-4 w-4 mr-2" />
             Export List
           </Button>

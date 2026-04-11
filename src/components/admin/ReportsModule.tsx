@@ -352,9 +352,13 @@ export function ReportsModule({ students, units, enrollments }: ReportsModulePro
                     <p>• Units enrolled per student</p>
                     <p>• Total unit count</p>
                   </div>
-                  <Button onClick={exportStudentEnrollmentReport} className="w-full" size="sm">
+                  <Button
+                    onClick={exportStudentEnrollmentReport}
+                    className="w-full border border-blue-800/45 bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white hover:brightness-110"
+                    size="sm"
+                  >
                     <Download className="h-4 w-4 mr-2" />
-                    Export Report
+                    Generate Report
                   </Button>
                 </div>
               </CardContent>
@@ -377,9 +381,13 @@ export function ReportsModule({ students, units, enrollments }: ReportsModulePro
                     <span className="text-sm text-gray-600">Total Students:</span>
                     <Badge className="bg-green-600">{studentsWithMultipleUnits.length}</Badge>
                   </div>
-                  <Button onClick={exportMultipleUnitsReport} className="w-full" size="sm">
+                  <Button
+                    onClick={exportMultipleUnitsReport}
+                    className="w-full border border-blue-800/45 bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white hover:brightness-110"
+                    size="sm"
+                  >
                     <Download className="h-4 w-4 mr-2" />
-                    Export Report
+                    Generate Report
                   </Button>
                 </div>
               </CardContent>
@@ -406,9 +414,13 @@ export function ReportsModule({ students, units, enrollments }: ReportsModulePro
                       </p>
                     ))}
                   </div>
-                  <Button onClick={exportUnitPopularityReport} className="w-full" size="sm">
+                  <Button
+                    onClick={exportUnitPopularityReport}
+                    className="w-full border border-blue-800/45 bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white hover:brightness-110"
+                    size="sm"
+                  >
                     <Download className="h-4 w-4 mr-2" />
-                    Export Report
+                    Generate Report
                   </Button>
                 </div>
               </CardContent>
