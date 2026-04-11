@@ -24,22 +24,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleResetData = async () => {
-    if (!confirm('This will reset backend data to demo defaults. Continue?')) {
-      return;
-    }
-
-    try {
-      await mockApi.resetDemoData();
-      toast.success('Backend demo data reset successfully. Reloading page...');
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to reset backend data');
-    }
-  };
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -193,7 +177,16 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                     <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Demo Access</p>
                     <div className="space-y-1 text-sm leading-6">
                       <p className="text-slate-700">
-                        <strong>Student:</strong> student@cihe.edu
+                        <strong>Student:</strong> student@cihe.edu (pwd: student123)
+                      </p>
+                      <p className="text-slate-700">
+                        <strong>Student:</strong> sarah@cihe.edu (pwd: student123)
+                      </p>
+                      <p className="text-slate-700">
+                        <strong>Student:</strong> michael@cihe.edu (pwd: student123)
+                      </p>
+                      <p className="text-slate-700">
+                        <strong>Student:</strong> emma@cihe.edu (pwd: student123)
                       </p>
                       <p className="text-slate-700">
                         <strong>Admin:</strong> admin@cihe.edu (pwd: admin123)
@@ -308,12 +301,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           </CardContent>
         </Card>
 
-        <div className="mt-4 text-center">
-          <Button variant="outline" className="border-white/20 bg-white/10 text-xs text-white hover:bg-white/15 hover:text-white" onClick={handleResetData}>
-            <RefreshCw className="h-3 w-3 mr-1" />
-            Reset Data
-          </Button>
-        </div>
       </div>
     </div>
   );
