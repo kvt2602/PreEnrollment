@@ -180,11 +180,19 @@ export function UnitOverlapMatrix({ units, enrollments, students }: UnitOverlapM
               </CardDescription>
             </div>
             <div className="flex gap-2">
-              <Button onClick={exportMatrix} variant="outline" size="sm">
+              <Button
+                onClick={exportMatrix}
+                className="border border-blue-800/45 bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white hover:brightness-110"
+                size="sm"
+              >
                 <Download className="h-4 w-4 mr-2" />
                 Matrix CSV
               </Button>
-              <Button onClick={exportPairTable} variant="outline" size="sm">
+              <Button
+                onClick={exportPairTable}
+                className="border border-blue-800/45 bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white hover:brightness-110"
+                size="sm"
+              >
                 <Download className="h-4 w-4 mr-2" />
                 Pair Table CSV
               </Button>

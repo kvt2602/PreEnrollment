@@ -1,13 +1,18 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 const request = async (path: string, options: RequestInit = {}) => {
-  const response = await fetch(`${API_BASE}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
-    },
-    ...options,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers || {}),
+      },
+      ...options,
+    });
+  } catch {
+    throw new Error('Cannot connect to the server. Please start the backend API (npm run api:dev).');
+  }
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
