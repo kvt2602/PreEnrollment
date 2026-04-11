@@ -232,10 +232,10 @@ export function UnitOverlapMatrix({ units, enrollments, students }: UnitOverlapM
                     {units.map(unit => (
                       <th
                         key={unit.id}
-                        className="border border-gray-300 p-2 text-xs font-medium text-gray-700 min-w-[60px] max-w-[60px]"
+                        className="h-12 min-w-[76px] max-w-[76px] border border-gray-300 px-1 py-2 align-middle text-center text-[11px] font-semibold text-gray-700"
                         title={unit.name}
                       >
-                        <div className="transform -rotate-45 origin-left whitespace-nowrap">
+                        <div className="mx-auto w-full truncate leading-none">
                           {unit.unitCode}
                         </div>
                       </th>
