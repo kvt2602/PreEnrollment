@@ -69,6 +69,7 @@ const AVAILABLE_COURSES = [
 ];
 
 export function StudentDashboard({ user, onLogout }: StudentDashboardProps) {
+  const maxPreferences = 4;
   const [preferences, setPreferences] = useState<any[]>([]);
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -199,6 +200,18 @@ export function StudentDashboard({ user, onLogout }: StudentDashboardProps) {
     }
   };
 
+  const remainingSlots = Math.max(0, maxPreferences - preferences.length);
+  const progressPercent = Math.min((preferences.length / maxPreferences) * 100, 100);
+  const uniqueCourseCount = new Set(preferences.map((preference) => preference.courseId)).size;
+  const uniqueDayCount = new Set(preferences.map((preference) => preference.dayPreference).filter(Boolean)).size;
+  const latestSubmitted = preferences.length
+    ? new Date(
+        Math.max(
+          ...preferences.map((preference) => new Date(preference.submittedAt || 0).getTime())
+        )
+      ).toLocaleDateString()
+    : 'N/A';
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(96,165,250,0.2),_transparent_28%),linear-gradient(135deg,#0f172a_0%,#163b72_45%,#10213e_100%)]">
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:48px_48px] opacity-20" />
@@ -207,16 +220,69 @@ export function StudentDashboard({ user, onLogout }: StudentDashboardProps) {
 
       {/* Main Content */}
       <main className="relative container mx-auto px-4 py-8">
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 gap-6 mb-8">
+        {/* Student Summary */}
+        <div className="mb-8 grid gap-6 lg:grid-cols-[1.8fr_1fr]">
           <Card className="border border-white/50 bg-white/95 shadow-[0_18px_50px_rgba(15,23,42,0.18)]">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-slate-900">Total Preferences</CardTitle>
-              <BookOpen className="h-5 w-5 text-blue-600" />
+            <CardHeader className="pb-4">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <CardTitle className="text-slate-900">Student Summary</CardTitle>
+                  <CardDescription>
+                    Track your submitted preferences and remaining course slots for this semester.
+                  </CardDescription>
+                </div>
+                <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-800">
+                  <BookOpen className="h-4 w-4" />
+                  {preferences.length} of {maxPreferences} submitted
+                </div>
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-semibold text-blue-900">{preferences.length}</div>
-              <p className="mt-1 text-slate-500">Course preferences submitted</p>
+            <CardContent className="space-y-5">
+              <div>
+                <div className="mb-2 flex items-center justify-between text-sm text-slate-600">
+                  <span>Preference progress</span>
+                  <span>{remainingSlots} remaining</span>
+                </div>
+                <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 transition-all"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Courses Selected</p>
+                  <p className="mt-2 text-2xl font-semibold text-slate-900">{uniqueCourseCount}</p>
+                </div>
+                <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Days Chosen</p>
+                  <p className="mt-2 text-2xl font-semibold text-slate-900">{uniqueDayCount}</p>
+                </div>
+                <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Latest Submission</p>
+                  <p className="mt-2 text-base font-semibold text-slate-900">{latestSubmitted}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border border-white/50 bg-white/95 shadow-[0_18px_50px_rgba(15,23,42,0.18)]">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-slate-900">Quick Rules</CardTitle>
+              <CardDescription>Key limits students should keep in mind.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm text-slate-600">
+              <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                Maximum <span className="font-semibold text-slate-900">4</span> course preferences per semester.
+              </div>
+              <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                Maximum <span className="font-semibold text-slate-900">3</span> classes per day.
+              </div>
+              <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                Each class has a capacity limit of <span className="font-semibold text-slate-900">30 students</span>.
+              </div>
             </CardContent>
           </Card>
         </div>
