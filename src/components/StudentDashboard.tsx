@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Badge } from './ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -209,42 +208,24 @@ export function StudentDashboard({ user, onLogout }: StudentDashboardProps) {
       {/* Main Content */}
       <main className="relative container mx-auto px-4 py-8">
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <Card>
+        <div className="grid grid-cols-1 gap-6 mb-8">
+          <Card className="border border-white/50 bg-white/95 shadow-[0_18px_50px_rgba(15,23,42,0.18)]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle>Total Preferences</CardTitle>
+              <CardTitle className="text-slate-900">Total Preferences</CardTitle>
               <BookOpen className="h-5 w-5 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-blue-900">{preferences.length}</div>
-              <p className="text-gray-500 mt-1">Course recommendations submitted</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle>Available Courses</CardTitle>
-              <BookOpen className="h-5 w-5 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-green-700">{courses.length}</div>
-              <p className="text-gray-500 mt-1">Courses to choose from</p>
+              <div className="text-4xl font-semibold text-blue-900">{preferences.length}</div>
+              <p className="mt-1 text-slate-500">Course preferences submitted</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Add Course Preference */}
-        <div className="mb-6">
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="w-full md:w-auto border border-blue-800/45 bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white hover:brightness-110">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Course Preference
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
+        {/* Course Preference Dialog */}
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogContent className="border border-slate-200 bg-white/98">
               <DialogHeader>
-                <DialogTitle>Select Course Preference</DialogTitle>
+                <DialogTitle className="text-slate-900">Select Course Preference</DialogTitle>
                 <DialogDescription>
                   Choose a course and your preferred time slot
                 </DialogDescription>
@@ -342,7 +323,7 @@ export function StudentDashboard({ user, onLogout }: StudentDashboardProps) {
                 </div>
 
                 <Button 
-                  className="w-full" 
+                  className="w-full border border-blue-800/45 bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white hover:brightness-110" 
                   onClick={handleSubmitPreference}
                   disabled={submitting || !selectedCourse || !timePreference || !dayPreference}
                 >
@@ -350,62 +331,70 @@ export function StudentDashboard({ user, onLogout }: StudentDashboardProps) {
                 </Button>
               </div>
             </DialogContent>
-          </Dialog>
-        </div>
+        
 
         {/* My Course Preferences */}
-        <Card>
-          <CardHeader>
-            <CardTitle>My Course Preferences</CardTitle>
-            <CardDescription>
-              View your submitted course recommendations
-            </CardDescription>
+        <Card className="border border-white/50 bg-white/95 shadow-[0_18px_50px_rgba(15,23,42,0.18)]">
+          <CardHeader className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div>
+              <CardTitle className="text-slate-900">My Course Preferences</CardTitle>
+              <CardDescription>
+                View your submitted course recommendations
+              </CardDescription>
+            </div>
+            <DialogTrigger asChild>
+              <Button className="w-full md:w-auto border border-blue-800/45 bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white hover:brightness-110">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Course
+              </Button>
+            </DialogTrigger>
           </CardHeader>
           <CardContent>
             {loading ? (
-              <p className="text-gray-500 text-center py-8">Loading...</p>
+              <p className="text-slate-500 text-center py-8">Loading...</p>
             ) : preferences.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">
-                No course preferences submitted yet. Click "Add Course Preference" to get started.
+              <p className="text-slate-500 text-center py-8">
+                No course preferences submitted yet. Click "+ Add Course" to get started.
               </p>
             ) : (
               <div className="space-y-4">
                 {preferences.map((preference) => (
                   <div
                     key={preference.id}
-                    className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                    className="rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_8px_24px_rgba(15,23,42,0.06)] transition-colors hover:bg-slate-50/70"
                   >
-                    <div className="flex items-start justify-between">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="outline" className="text-sm">{getCourseUnitCode(preference.courseId)}</Badge>
-                          <h3 className="text-gray-900 font-medium">
+                        <div className="mb-4">
+                          <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                            {getCourseUnitCode(preference.courseId)}
+                          </p>
+                          <h3 className="text-xl font-semibold tracking-tight text-slate-900">
                             {getCourseName(preference.courseId)}
                           </h3>
                         </div>
-                        <div className="flex items-center gap-4 text-gray-600">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
+                          <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5">
+                            <Calendar className="h-4 w-4 text-slate-500" />
                             <span>{preference.dayPreference || 'N/A'}</span>
                           </div>
-                          <span>•</span>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
+                          <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5">
+                            <Clock className="h-4 w-4 text-slate-500" />
                             <span>{preference.timePreference}</span>
                           </div>
-                          <span>•</span>
-                          <span>
-                            Submitted: {new Date(preference.submittedAt).toLocaleDateString()}
-                          </span>
+                          <div className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1.5 text-slate-600">
+                            Submitted {new Date(preference.submittedAt).toLocaleDateString()}
+                          </div>
                         </div>
                       </div>
                       <Button
-                        variant="destructive"
+                        variant="outline"
                         size="sm"
+                        className="h-11 rounded-xl border-rose-200 bg-white px-4 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
                         onClick={() => handleDeletePreference(preference.id)}
                       >
                         <Trash2 className="h-4 w-4 mr-1" />
-                        Remove
+                        Cancel
                       </Button>
                     </div>
                   </div>
@@ -414,6 +403,7 @@ export function StudentDashboard({ user, onLogout }: StudentDashboardProps) {
             )}
           </CardContent>
         </Card>
+        </Dialog>
       </main>
     </div>
   );

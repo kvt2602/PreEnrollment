@@ -2,7 +2,7 @@ export const demoUsers = [
   {
     email: 'student@cihe.edu',
     password: 'student123',
-    name: 'John Student',
+    name: 'student',
     role: 'student',
     ciheId: 'CIHE231554',
   },
