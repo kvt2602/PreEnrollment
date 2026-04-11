@@ -200,8 +200,6 @@ export function StudentDashboard({ user, onLogout }: StudentDashboardProps) {
     }
   };
 
-  const remainingSlots = Math.max(0, maxPreferences - preferences.length);
-  const progressPercent = Math.min((preferences.length / maxPreferences) * 100, 100);
   const uniqueCourseCount = new Set(preferences.map((preference) => preference.courseId)).size;
   const uniqueDayCount = new Set(preferences.map((preference) => preference.dayPreference).filter(Boolean)).size;
   const latestSubmitted = preferences.length
@@ -238,19 +236,6 @@ export function StudentDashboard({ user, onLogout }: StudentDashboardProps) {
               </div>
             </CardHeader>
             <CardContent className="space-y-5">
-              <div>
-                <div className="mb-2 flex items-center justify-between text-sm text-slate-600">
-                  <span>Preference progress</span>
-                  <span>{remainingSlots} remaining</span>
-                </div>
-                <div className="h-3 overflow-hidden rounded-full bg-slate-100">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-blue-700 via-blue-600 to-sky-400 transition-all"
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
-              </div>
-
               <div className="grid gap-3 sm:grid-cols-3">
                 <div className="rounded-2xl bg-slate-50 px-4 py-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Courses Selected</p>
@@ -264,24 +249,6 @@ export function StudentDashboard({ user, onLogout }: StudentDashboardProps) {
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Latest Submission</p>
                   <p className="mt-2 text-base font-semibold text-slate-900">{latestSubmitted}</p>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border border-white/50 bg-white/95 shadow-[0_18px_50px_rgba(15,23,42,0.18)]">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-slate-900">Quick Rules</CardTitle>
-              <CardDescription>Key limits students should keep in mind.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm text-slate-600">
-              <div className="rounded-2xl bg-slate-50 px-4 py-3">
-                Maximum <span className="font-semibold text-slate-900">4</span> course preferences per semester.
-              </div>
-              <div className="rounded-2xl bg-slate-50 px-4 py-3">
-                Maximum <span className="font-semibold text-slate-900">3</span> classes per day.
-              </div>
-              <div className="rounded-2xl bg-slate-50 px-4 py-3">
-                Each class has a capacity limit of <span className="font-semibold text-slate-900">30 students</span>.
               </div>
             </CardContent>
           </Card>

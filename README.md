@@ -61,10 +61,6 @@ CORS_ORIGIN=http://localhost:3000
 
 ### 4. Run backend API
 
-```bash
-npm run api:dev
-```
-
 Backend health endpoint:
 
 http://localhost:4000/api/health
