@@ -1,3 +1,4 @@
+// Demo users inserted into the database for local testing and first-run setup.
 export const demoUsers = [
   {
     email: 'student@cihe.edu',
@@ -36,6 +37,7 @@ export const demoUsers = [
   },
 ];
 
+// Demo courses spanning multiple semesters and day/time slots.
 export const demoCourses = [
   { id: 'ICT101', name: 'Introduction to Information Technology', unitCode: 'ICT101', semester: '1', dayOfWeek: 'Monday', timeSlot: '8:15-11:15' },
   { id: 'ICT103', name: 'Programming', unitCode: 'ICT103', semester: '1', dayOfWeek: 'Monday', timeSlot: '11:30-14:30' },
@@ -62,6 +64,7 @@ export const demoCourses = [
   { id: 'ICT310', name: 'Information Technology Services Management', unitCode: 'ICT310', semester: '6', dayOfWeek: 'Wednesday', timeSlot: '14:45-17:45' },
 ];
 
+// Demo preference submissions used to populate reports and dashboards with sample data.
 export const demoPreferences = [
   {
     id: 'student@cihe.edu:ICT101:1',
@@ -110,8 +113,11 @@ export const demoPreferences = [
   },
 ];
 
+// Seed the database with demo content.
+// When force=true, existing table data is cleared before reseeding.
 export async function seedDatabase(pool, { force = false } = {}) {
   if (force) {
+    // Temporarily disable foreign-key checks so tables can be truncated safely.
     await pool.query('SET FOREIGN_KEY_CHECKS = 0');
     await pool.query('TRUNCATE TABLE preferences');
     await pool.query('TRUNCATE TABLE courses');
@@ -119,6 +125,7 @@ export async function seedDatabase(pool, { force = false } = {}) {
     await pool.query('SET FOREIGN_KEY_CHECKS = 1');
   }
 
+  // Only seed automatically when the users table is empty, unless forced.
   const [userCountRows] = await pool.query('SELECT COUNT(*) AS count FROM users');
   const shouldSeed = force || Number(userCountRows[0]?.count || 0) === 0;
 
@@ -126,6 +133,7 @@ export async function seedDatabase(pool, { force = false } = {}) {
     return { seeded: false };
   }
 
+  // Upsert each demo user so rerunning the seed keeps sample accounts current.
   for (const user of demoUsers) {
     await pool.query(
       `INSERT INTO users (email, password, name, role, cihe_id)
@@ -139,6 +147,7 @@ export async function seedDatabase(pool, { force = false } = {}) {
     );
   }
 
+  // Upsert course records so dashboards always have a stable course catalogue.
   for (const course of demoCourses) {
     await pool.query(
       `INSERT INTO courses (id, name, unit_code, semester, day_of_week, time_slot)
@@ -153,6 +162,7 @@ export async function seedDatabase(pool, { force = false } = {}) {
     );
   }
 
+  // Upsert preference records so the admin reports show realistic example submissions.
   for (const preference of demoPreferences) {
     await pool.query(
       `INSERT INTO preferences (id, student_email, course_id, time_preference, day_preference, status, submitted_at)
@@ -174,5 +184,6 @@ export async function seedDatabase(pool, { force = false } = {}) {
     );
   }
 
+  // Report back that fresh seed data is now available.
   return { seeded: true };
 }

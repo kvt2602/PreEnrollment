@@ -4,16 +4,20 @@ import dotenv from 'dotenv';
 import pool from './db.js';
 import { seedDatabase } from './seedData.js';
 
+// Load environment variables from a .env file before the server starts.
 dotenv.config();
 
+// Create the Express application and resolve the port once at startup.
 const app = express();
 const port = Number(process.env.PORT || 4000);
 
+// Allow the frontend to call this API and accept JSON request bodies.
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
 }));
 app.use(express.json());
 
+// Convert a database user row into the shape expected by the frontend.
 const mapUser = (row) => ({
   email: row.email,
   name: row.name,
@@ -21,6 +25,7 @@ const mapUser = (row) => ({
   ciheId: row.cihe_id,
 });
 
+// Convert a database course row into API-friendly camelCase fields.
 const mapCourse = (row) => ({
   id: row.id,
   name: row.name,
@@ -41,6 +46,8 @@ const mapPreference = (row) => ({
   submittedAt: row.submitted_at,
 });
 
+// Group time values into morning/evening buckets so reports stay consistent
+// even when the stored value is either a label or a clock time.
 function toBucket(slot) {
   const value = (slot || '').toLowerCase();
   if (value === 'morning' || value === 'evening') {
@@ -53,17 +60,21 @@ function toBucket(slot) {
   return 'evening';
 }
 
+// Simple health check used to confirm the API and database connection are alive.
 app.get('/api/health', async (_req, res) => {
   await pool.query('SELECT 1');
   res.json({ ok: true });
 });
 
+// Seed the database on demand for local setup or resetting demo data.
 app.post('/api/setup/seed', async (req, res) => {
   const force = Boolean(req.body?.force);
   const result = await seedDatabase(pool, { force });
   res.json(result);
 });
 
+// Authenticate a user with a simple email/password lookup.
+// Note: this project currently stores plain-text passwords in the database.
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body || {};
   if (!email || !password) {
@@ -82,6 +93,7 @@ app.post('/api/auth/login', async (req, res) => {
   return res.json({ user: mapUser(rows[0]) });
 });
 
+// Register a new student or admin account after validating required fields.
 app.post('/api/auth/register', async (req, res) => {
   const { email, password, name, role } = req.body || {};
   if (!email || !password || !name || !role) {
@@ -97,6 +109,7 @@ app.post('/api/auth/register', async (req, res) => {
     return res.status(409).json({ message: 'User already exists' });
   }
 
+  // Student accounts receive a generated CIHE identifier; admins do not.
   const ciheId = role === 'student' ? `CIHE${Math.floor(100000 + Math.random() * 900000)}` : null;
 
   await pool.query(
@@ -114,6 +127,7 @@ app.post('/api/auth/register', async (req, res) => {
   });
 });
 
+// Return all users, or only users for a specific role when requested.
 app.get('/api/users', async (req, res) => {
   const role = req.query.role;
   let query = 'SELECT email, name, role, cihe_id FROM users';
@@ -130,6 +144,7 @@ app.get('/api/users', async (req, res) => {
   res.json({ users: rows.map(mapUser) });
 });
 
+// Return the current list of courses for dashboards and forms.
 app.get('/api/courses', async (_req, res) => {
   const [rows] = await pool.query(
     'SELECT id, name, unit_code, semester, day_of_week, time_slot, created_at FROM courses ORDER BY unit_code ASC'
@@ -137,6 +152,7 @@ app.get('/api/courses', async (_req, res) => {
   res.json({ courses: rows.map(mapCourse) });
 });
 
+// Create a new course after checking for missing fields and duplicate unit codes.
 app.post('/api/courses', async (req, res) => {
   const { name, unitCode, semester, dayOfWeek, timeSlot } = req.body || {};
   if (!name || !unitCode || !semester || !dayOfWeek || !timeSlot) {
@@ -148,6 +164,7 @@ app.post('/api/courses', async (req, res) => {
     return res.status(409).json({ message: 'A course with this unit code already exists' });
   }
 
+  // Use the unit code as the course identifier so the ID is stable and readable.
   const id = unitCode;
   await pool.query(
     'INSERT INTO courses (id, name, unit_code, semester, day_of_week, time_slot) VALUES (?, ?, ?, ?, ?, ?)',
@@ -162,6 +179,7 @@ app.post('/api/courses', async (req, res) => {
   return res.status(201).json({ course: mapCourse(rows[0]) });
 });
 
+// Update an existing course while preserving unit-code uniqueness.
 app.put('/api/courses/:id', async (req, res) => {
   const { id } = req.params;
   const { name, unitCode, semester, dayOfWeek, timeSlot } = req.body || {};
@@ -176,6 +194,7 @@ app.put('/api/courses/:id', async (req, res) => {
 
   const currentUnitCode = existingById[0].unit_code;
   if (unitCode !== currentUnitCode) {
+    // Only perform the duplicate check when the unit code is actually changing.
     const [duplicate] = await pool.query(
       'SELECT id FROM courses WHERE unit_code = ? AND id <> ? LIMIT 1',
       [unitCode, id]
@@ -198,6 +217,7 @@ app.put('/api/courses/:id', async (req, res) => {
   return res.json({ course: mapCourse(rows[0]) });
 });
 
+// Prevent deleting a course that is already referenced by student preferences.
 app.delete('/api/courses/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -210,6 +230,7 @@ app.delete('/api/courses/:id', async (req, res) => {
   return res.json({ success: true });
 });
 
+// Return preference submissions, optionally filtered to a single student.
 app.get('/api/preferences', async (req, res) => {
   const { email } = req.query;
   let query = 'SELECT id, student_email, course_id, time_preference, day_preference, status, submitted_at FROM preferences';
@@ -226,6 +247,7 @@ app.get('/api/preferences', async (req, res) => {
   return res.json({ preferences: rows.map(mapPreference) });
 });
 
+// Admin-focused endpoint that returns all preferences without filters.
 app.get('/api/preferences/all', async (_req, res) => {
   const [rows] = await pool.query(
     'SELECT id, student_email, course_id, time_preference, day_preference, status, submitted_at FROM preferences ORDER BY submitted_at DESC'
@@ -233,12 +255,14 @@ app.get('/api/preferences/all', async (_req, res) => {
   return res.json({ preferences: rows.map(mapPreference) });
 });
 
+// Create a new preference submission for a student's chosen course and timeslot.
 app.post('/api/preferences', async (req, res) => {
   const { studentEmail, courseId, timePreference, dayPreference } = req.body || {};
   if (!studentEmail || !courseId || !timePreference || !dayPreference) {
     return res.status(400).json({ message: 'All preference fields are required' });
   }
 
+  // Build a simple unique ID from the student, course, and submission time.
   const id = `${studentEmail}:${courseId}:${Date.now()}`;
   const submittedAt = new Date();
 
@@ -257,6 +281,7 @@ app.post('/api/preferences', async (req, res) => {
   return res.status(201).json({ preference: mapPreference(rows[0]) });
 });
 
+// Allow admins to approve, reject, or reset an enrollment preference.
 app.patch('/api/preferences/:id/status', async (req, res) => {
   const { id } = req.params;
   const { status } = req.body || {};
@@ -278,17 +303,20 @@ app.patch('/api/preferences/:id/status', async (req, res) => {
   return res.json({ preference: mapPreference(rows[0]) });
 });
 
+// Delete one specific preference submission.
 app.delete('/api/preferences/:id', async (req, res) => {
   const { id } = req.params;
   await pool.query('DELETE FROM preferences WHERE id = ?', [id]);
   return res.json({ success: true });
 });
 
+// Clear every preference record. This is useful for resets but should be used carefully.
 app.delete('/api/preferences', async (_req, res) => {
   await pool.query('DELETE FROM preferences');
   return res.json({ success: true });
 });
 
+// Build summary statistics used by admin reporting screens.
 app.get('/api/statistics', async (_req, res) => {
   const [coursesRows] = await pool.query(
     'SELECT id, name, unit_code, semester, day_of_week, time_slot, created_at FROM courses ORDER BY unit_code ASC'
@@ -300,6 +328,7 @@ app.get('/api/statistics', async (_req, res) => {
   const courses = coursesRows.map(mapCourse);
   const preferences = preferencesRows.map(mapPreference);
 
+  // For each course, count total submissions, status breakdown, and time-of-day demand.
   const statistics = courses.map((course) => {
     const coursePreferences = preferences.filter((p) => p.courseId === course.id);
     const morningPrefs = coursePreferences.filter((p) => toBucket(p.timePreference) === 'morning');
@@ -323,6 +352,8 @@ app.get('/api/statistics', async (_req, res) => {
   return res.json({ statistics });
 });
 
+// Detect students who selected multiple courses in the same time bucket,
+// which may indicate timetable overlap or delivery conflicts.
 app.get('/api/overlap-analysis', async (_req, res) => {
   const [preferencesRows] = await pool.query(
     'SELECT id, student_email, course_id, time_preference, day_preference, status, submitted_at FROM preferences'
@@ -336,6 +367,7 @@ app.get('/api/overlap-analysis', async (_req, res) => {
   const courses = coursesRows.map(mapCourse);
   const users = usersRows.map(mapUser);
 
+  // Group all preference records by student so each student can be checked once.
   const studentPreferences = new Map();
   preferences.forEach((pref) => {
     if (!studentPreferences.has(pref.studentEmail)) {
@@ -350,6 +382,7 @@ app.get('/api/overlap-analysis', async (_req, res) => {
     const morningCourses = prefs.filter((p) => toBucket(p.timePreference) === 'morning');
     const eveningCourses = prefs.filter((p) => toBucket(p.timePreference) === 'evening');
 
+    // A student appears in the report when they have more than one course in the same bucket.
     if (morningCourses.length > 1) {
       overlaps.push({
         studentEmail,
@@ -397,6 +430,7 @@ app.get('/api/overlap-analysis', async (_req, res) => {
   });
 });
 
+// Centralized error handler so async route failures return JSON instead of crashing silently.
 app.use((err, _req, res, _next) => {
   console.error(err);
   const status = err.status || 500;
@@ -404,6 +438,8 @@ app.use((err, _req, res, _next) => {
   res.status(status).json({ message });
 });
 
+// Start the HTTP server and try to verify that the database is reachable.
+// If the database is not ready yet, the API still starts so local development can continue.
 app.listen(port, async () => {
   try {
     await pool.query('SELECT 1');
