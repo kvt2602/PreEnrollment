@@ -1,36 +1,43 @@
+import bcrypt from 'bcryptjs';
+
+// Plain-text demo passwords — only used at seed time, stored as bcrypt hashes.
+const DEMO_STUDENT_PASSWORD = 'student123';
+const DEMO_ADMIN_PASSWORD = 'admin123';
+
 // Demo users inserted into the database for local testing and first-run setup.
+// Passwords will be hashed with bcrypt before insertion (see seedDatabase).
 export const demoUsers = [
   {
     email: 'student@cihe.edu',
-    password: 'student123',
+    password: DEMO_STUDENT_PASSWORD,
     name: 'student',
     role: 'student',
     ciheId: 'CIHE231554',
   },
   {
     email: 'sarah@cihe.edu',
-    password: 'student123',
+    password: DEMO_STUDENT_PASSWORD,
     name: 'Sarah Johnson',
     role: 'student',
     ciheId: 'CIHE231555',
   },
   {
     email: 'michael@cihe.edu',
-    password: 'student123',
+    password: DEMO_STUDENT_PASSWORD,
     name: 'Michael Chen',
     role: 'student',
     ciheId: 'CIHE231556',
   },
   {
     email: 'emma@cihe.edu',
-    password: 'student123',
+    password: DEMO_STUDENT_PASSWORD,
     name: 'Emma Williams',
     role: 'student',
     ciheId: 'CIHE231557',
   },
   {
     email: 'admin@cihe.edu',
-    password: 'admin123',
+    password: DEMO_ADMIN_PASSWORD,
     name: 'Admin User',
     role: 'admin',
     ciheId: null,
@@ -73,7 +80,7 @@ export const demoPreferences = [
     timePreference: '8:15-11:15',
     dayPreference: 'Monday',
     status: 'pending',
-    submittedAt: '2025-03-15T00:00:00.000Z',
+    submittedAt: '2025-03-15 00:00:00',
   },
   {
     id: 'student@cihe.edu:ICT103:2',
@@ -82,7 +89,7 @@ export const demoPreferences = [
     timePreference: '11:30-14:30',
     dayPreference: 'Monday',
     status: 'pending',
-    submittedAt: '2025-03-15T00:00:00.000Z',
+    submittedAt: '2025-03-15 00:00:00',
   },
   {
     id: 'sarah@cihe.edu:BUS112:3',
@@ -91,7 +98,7 @@ export const demoPreferences = [
     timePreference: '18:00-21:00',
     dayPreference: 'Thursday',
     status: 'pending',
-    submittedAt: '2025-03-18T00:00:00.000Z',
+    submittedAt: '2025-03-18 00:00:00',
   },
   {
     id: 'michael@cihe.edu:ICT102:4',
@@ -100,7 +107,7 @@ export const demoPreferences = [
     timePreference: '14:45-17:45',
     dayPreference: 'Friday',
     status: 'pending',
-    submittedAt: '2025-03-20T00:00:00.000Z',
+    submittedAt: '2025-03-20 00:00:00',
   },
   {
     id: 'emma@cihe.edu:ICT205:5',
@@ -109,7 +116,7 @@ export const demoPreferences = [
     timePreference: '8:15-11:15',
     dayPreference: 'Thursday',
     status: 'pending',
-    submittedAt: '2025-03-21T00:00:00.000Z',
+    submittedAt: '2025-03-21 00:00:00',
   },
 ];
 
@@ -134,7 +141,9 @@ export async function seedDatabase(pool, { force = false } = {}) {
   }
 
   // Upsert each demo user so rerunning the seed keeps sample accounts current.
+  // Passwords are hashed with bcrypt before being stored.
   for (const user of demoUsers) {
+    const hashedPassword = await bcrypt.hash(user.password, 12);
     await pool.query(
       `INSERT INTO users (email, password, name, role, cihe_id)
        VALUES (?, ?, ?, ?, ?)
@@ -143,7 +152,7 @@ export async function seedDatabase(pool, { force = false } = {}) {
          name = VALUES(name),
          role = VALUES(role),
          cihe_id = VALUES(cihe_id)`,
-      [user.email, user.password, user.name, user.role, user.ciheId]
+      [user.email, hashedPassword, user.name, user.role, user.ciheId]
     );
   }
 

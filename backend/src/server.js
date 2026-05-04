@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import pool from './db.js';
 import { seedDatabase } from './seedData.js';
@@ -11,11 +13,29 @@ dotenv.config();
 const app = express();
 const port = Number(process.env.PORT || 4000);
 
+// Security headers — sets X-Content-Type-Options, X-Frame-Options, removes X-Powered-By, etc.
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:'],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      frameAncestors: ["'none'"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+}));
+
 // Allow the frontend to call this API and accept JSON request bodies.
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3001',
 }));
-app.use(express.json());
+// Limit request body size to prevent payload-based DoS.
+app.use(express.json({ limit: '10kb' }));
 
 // Convert a database user row into the shape expected by the frontend.
 const mapUser = (row) => ({
@@ -60,7 +80,26 @@ function toBucket(slot) {
   return 'evening';
 }
 
-// Simple health check used to confirm the API and database connection are alive.
+// --- Input validation helpers ---
+
+// Validate email format.
+function isValidEmail(email) {
+  return typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+// Strip HTML tags and trim whitespace to prevent stored XSS.
+function sanitize(value) {
+  if (typeof value !== 'string') return value;
+  return value.replace(/<[^>]*>/g, '').trim();
+}
+
+// Validate password: minimum 8 chars, at least one letter and one digit.
+function isStrongPassword(password) {
+  return typeof password === 'string' && password.length >= 8 &&
+    /[a-zA-Z]/.test(password) && /[0-9]/.test(password);
+}
+
+// --- Simple health check used to confirm the API and database connection are alive.
 app.get('/api/health', async (_req, res) => {
   await pool.query('SELECT 1');
   res.json({ ok: true });
@@ -73,54 +112,81 @@ app.post('/api/setup/seed', async (req, res) => {
   res.json(result);
 });
 
-// Authenticate a user with a simple email/password lookup.
-// Note: this project currently stores plain-text passwords in the database.
+// Authenticate a user by verifying the bcrypt password hash.
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body || {};
+
   if (!email || !password) {
     return res.status(400).json({ message: 'Email and password are required' });
   }
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ message: 'Invalid email format' });
+  }
+  if (typeof password !== 'string' || password.length > 128) {
+    return res.status(400).json({ message: 'Invalid password' });
+  }
 
+  // Fetch by email only — never compare passwords in SQL to prevent timing attacks.
   const [rows] = await pool.query(
-    'SELECT email, name, role, cihe_id FROM users WHERE email = ? AND password = ? LIMIT 1',
-    [email, password]
+    'SELECT email, name, role, cihe_id, password FROM users WHERE email = ? LIMIT 1',
+    [email.trim().toLowerCase()]
   );
 
   if (!rows.length) {
+    // Return the same error regardless of whether the email exists (prevent user enumeration).
+    return res.status(401).json({ message: 'Invalid email or password' });
+  }
+
+  const passwordMatch = await bcrypt.compare(password, rows[0].password);
+  if (!passwordMatch) {
     return res.status(401).json({ message: 'Invalid email or password' });
   }
 
   return res.json({ user: mapUser(rows[0]) });
 });
 
-// Register a new student or admin account after validating required fields.
+// Register a new student or admin account after validating and hashing the password.
 app.post('/api/auth/register', async (req, res) => {
   const { email, password, name, role } = req.body || {};
+
   if (!email || !password || !name || !role) {
     return res.status(400).json({ message: 'Email, password, name, and role are required' });
   }
-
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ message: 'Invalid email format' });
+  }
+  if (!isStrongPassword(password)) {
+    return res.status(400).json({ message: 'Password must be at least 8 characters and contain a letter and a digit' });
+  }
+  const cleanName = sanitize(name);
+  if (!cleanName || cleanName.length > 100) {
+    return res.status(400).json({ message: 'Name must be between 1 and 100 characters' });
+  }
   if (role !== 'student' && role !== 'admin') {
     return res.status(400).json({ message: 'Role must be student or admin' });
   }
 
-  const [existing] = await pool.query('SELECT email FROM users WHERE email = ? LIMIT 1', [email]);
+  const normalizedEmail = email.trim().toLowerCase();
+  const [existing] = await pool.query('SELECT email FROM users WHERE email = ? LIMIT 1', [normalizedEmail]);
   if (existing.length) {
     return res.status(409).json({ message: 'User already exists' });
   }
+
+  // Hash the password with bcrypt before storing (cost factor 12).
+  const hashedPassword = await bcrypt.hash(password, 12);
 
   // Student accounts receive a generated CIHE identifier; admins do not.
   const ciheId = role === 'student' ? `CIHE${Math.floor(100000 + Math.random() * 900000)}` : null;
 
   await pool.query(
     'INSERT INTO users (email, password, name, role, cihe_id) VALUES (?, ?, ?, ?, ?)',
-    [email, password, name, role, ciheId]
+    [normalizedEmail, hashedPassword, cleanName, role, ciheId]
   );
 
   return res.status(201).json({
     user: {
-      email,
-      name,
+      email: normalizedEmail,
+      name: cleanName,
       role,
       ciheId,
     },
@@ -154,9 +220,14 @@ app.get('/api/courses', async (_req, res) => {
 
 // Create a new course after checking for missing fields and duplicate unit codes.
 app.post('/api/courses', async (req, res) => {
-  const { name, unitCode, semester, dayOfWeek, timeSlot } = req.body || {};
+  let { name, unitCode, semester, dayOfWeek, timeSlot } = req.body || {};
+  name = sanitize(name); unitCode = sanitize(unitCode);
+  semester = sanitize(semester); dayOfWeek = sanitize(dayOfWeek); timeSlot = sanitize(timeSlot);
   if (!name || !unitCode || !semester || !dayOfWeek || !timeSlot) {
     return res.status(400).json({ message: 'All course fields are required' });
+  }
+  if (name.length > 200 || unitCode.length > 20 || semester.length > 50 || dayOfWeek.length > 20 || timeSlot.length > 50) {
+    return res.status(400).json({ message: 'One or more course fields exceed the maximum allowed length' });
   }
 
   const [existing] = await pool.query('SELECT id FROM courses WHERE unit_code = ? LIMIT 1', [unitCode]);
@@ -182,9 +253,14 @@ app.post('/api/courses', async (req, res) => {
 // Update an existing course while preserving unit-code uniqueness.
 app.put('/api/courses/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, unitCode, semester, dayOfWeek, timeSlot } = req.body || {};
+  let { name, unitCode, semester, dayOfWeek, timeSlot } = req.body || {};
+  name = sanitize(name); unitCode = sanitize(unitCode);
+  semester = sanitize(semester); dayOfWeek = sanitize(dayOfWeek); timeSlot = sanitize(timeSlot);
   if (!name || !unitCode || !semester || !dayOfWeek || !timeSlot) {
     return res.status(400).json({ message: 'All course fields are required' });
+  }
+  if (name.length > 200 || unitCode.length > 20 || semester.length > 50 || dayOfWeek.length > 20 || timeSlot.length > 50) {
+    return res.status(400).json({ message: 'One or more course fields exceed the maximum allowed length' });
   }
 
   const [existingById] = await pool.query('SELECT id, unit_code FROM courses WHERE id = ? LIMIT 1', [id]);
@@ -257,9 +333,19 @@ app.get('/api/preferences/all', async (_req, res) => {
 
 // Create a new preference submission for a student's chosen course and timeslot.
 app.post('/api/preferences', async (req, res) => {
-  const { studentEmail, courseId, timePreference, dayPreference } = req.body || {};
+  let { studentEmail, courseId, timePreference, dayPreference } = req.body || {};
+  studentEmail = sanitize(studentEmail);
+  courseId = sanitize(courseId);
+  timePreference = sanitize(timePreference);
+  dayPreference = sanitize(dayPreference);
   if (!studentEmail || !courseId || !timePreference || !dayPreference) {
     return res.status(400).json({ message: 'All preference fields are required' });
+  }
+  if (!isValidEmail(studentEmail)) {
+    return res.status(400).json({ message: 'Invalid student email format' });
+  }
+  if (!['morning', 'evening'].includes(timePreference.toLowerCase())) {
+    return res.status(400).json({ message: 'Time preference must be morning or evening' });
   }
 
   // Build a simple unique ID from the student, course, and submission time.
