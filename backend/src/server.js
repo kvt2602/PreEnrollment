@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import pool from './db.js';
 import { seedDatabase } from './seedData.js';
+import { sendEnrollmentNotification } from './mailer.js';
 
 // Load environment variables from a .env file before the server starts.
 dotenv.config();
@@ -370,6 +371,7 @@ app.post('/api/preferences', async (req, res) => {
 });
 
 // Allow admins to approve, reject, or reset an enrollment preference.
+// Sends an email notification to the student when status becomes approved or rejected.
 app.patch('/api/preferences/:id/status', async (req, res) => {
   const { id } = req.params;
   const { status } = req.body || {};
@@ -388,7 +390,32 @@ app.patch('/api/preferences/:id/status', async (req, res) => {
     [id]
   );
 
-  return res.json({ preference: mapPreference(rows[0]) });
+  const preference = mapPreference(rows[0]);
+
+  // Send an email notification when the status is approved or rejected.
+  if (status === 'approved' || status === 'rejected') {
+    try {
+      // Look up the student name and the course name for the email body.
+      const [userRows] = await pool.query('SELECT name FROM users WHERE email = ? LIMIT 1', [preference.studentEmail]);
+      const [courseRows] = await pool.query('SELECT name, unit_code FROM courses WHERE id = ? LIMIT 1', [preference.courseId]);
+      const studentName = userRows[0]?.name || preference.studentEmail;
+      const courseName = courseRows[0]?.name || preference.courseId;
+      const unitCode = courseRows[0]?.unit_code || preference.courseId;
+
+      await sendEnrollmentNotification({
+        studentEmail: preference.studentEmail,
+        studentName,
+        courseName,
+        unitCode,
+        status,
+      });
+    } catch (emailErr) {
+      // Log the error but don't fail the API response — the status was already saved.
+      console.error('Failed to send enrolment notification email:', emailErr.message);
+    }
+  }
+
+  return res.json({ preference });
 });
 
 // Delete one specific preference submission.
