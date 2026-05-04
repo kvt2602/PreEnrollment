@@ -173,6 +173,27 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                     )}
                   </Button>
 
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Demo Access</p>
+                    <div className="space-y-1 text-sm leading-6">
+                      <p className="text-slate-700">
+                        <strong>Student:</strong> student@cihe.edu (pwd: student123)
+                      </p>
+                      <p className="text-slate-700">
+                        <strong>Student:</strong> sarah@cihe.edu (pwd: student123)
+                      </p>
+                      <p className="text-slate-700">
+                        <strong>Student:</strong> michael@cihe.edu (pwd: student123)
+                      </p>
+                      <p className="text-slate-700">
+                        <strong>Student:</strong> emma@cihe.edu (pwd: student123)
+                      </p>
+                      <p className="text-slate-700">
+                        <strong>Admin:</strong> admin@cihe.edu (pwd: admin123)
+                      </p>
+                    </div>
+                  </div>
+
                 </form>
               </TabsContent>
 

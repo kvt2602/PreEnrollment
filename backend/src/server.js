@@ -112,7 +112,7 @@ app.post('/api/setup/seed', async (req, res) => {
   res.json(result);
 });
 
-// Authenticate a user by verifying the bcrypt password hash.
+// Authenticate a user by email and compare the submitted password to the hashed password.
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body || {};
 
@@ -126,10 +126,12 @@ app.post('/api/auth/login', async (req, res) => {
     return res.status(400).json({ message: 'Invalid password' });
   }
 
+  const normalizedEmail = email.trim().toLowerCase();
+
   // Fetch by email only — never compare passwords in SQL to prevent timing attacks.
   const [rows] = await pool.query(
     'SELECT email, name, role, cihe_id, password FROM users WHERE email = ? LIMIT 1',
-    [email.trim().toLowerCase()]
+    [normalizedEmail]
   );
 
   if (!rows.length) {
@@ -137,12 +139,14 @@ app.post('/api/auth/login', async (req, res) => {
     return res.status(401).json({ message: 'Invalid email or password' });
   }
 
-  const passwordMatch = await bcrypt.compare(password, rows[0].password);
-  if (!passwordMatch) {
+  const userRow = rows[0];
+  const passwordMatches = await bcrypt.compare(password, userRow.password);
+
+  if (!passwordMatches) {
     return res.status(401).json({ message: 'Invalid email or password' });
   }
 
-  return res.json({ user: mapUser(rows[0]) });
+  return res.json({ user: mapUser(userRow) });
 });
 
 // Register a new student or admin account after validating and hashing the password.
@@ -181,8 +185,6 @@ app.post('/api/auth/register', async (req, res) => {
   await pool.query(
     'INSERT INTO users (email, password, name, role, cihe_id) VALUES (?, ?, ?, ?, ?)',
     [normalizedEmail, hashedPassword, cleanName, role, ciheId]
-  );
-
   return res.status(201).json({
     user: {
       email: normalizedEmail,
