@@ -186,6 +186,7 @@ app.post('/api/auth/register', async (req, res) => {
   await pool.query(
     'INSERT INTO users (email, password, name, role, cihe_id) VALUES (?, ?, ?, ?, ?)',
     [normalizedEmail, hashedPassword, cleanName, role, ciheId]
+  );
   return res.status(201).json({
     user: {
       email: normalizedEmail,
