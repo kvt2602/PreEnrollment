@@ -62,18 +62,27 @@ const AVAILABLE_COURSES = [
   { name: 'Project 2 (Programming and Testing)', unitCode: 'ICT308', semester: '6', isElective: false, prerequisite: 'ICT307 Project 1 (Analysis and Design)' },
   { name: 'Information Technology Services Management', unitCode: 'ICT310', semester: '6', isElective: false, prerequisite: 'ICT301 Information Technology Project Management' },
   
-  // Available Elective Options (can be selected in Semester 4, 5, or 6)
-  { name: 'Managing People and Culture', unitCode: 'BUS206', semester: '4,5,6', isElective: true, prerequisite: '' },
-  { name: 'Knowledge Management', unitCode: 'ICT207', semester: '4,5,6', isElective: true, prerequisite: '' },
-  { name: 'The Digital Economy', unitCode: 'BUS301', semester: '4,5,6', isElective: true, prerequisite: '' },
-  { name: 'Work-Integrated Learning (Internship)', unitCode: 'BUS307', semester: '4,5,6', isElective: true, prerequisite: '' },
-  { name: 'Distributed Computing', unitCode: 'ICT304', semester: '4,5,6', isElective: true, prerequisite: '' },
-  { name: 'Secure Software Development', unitCode: 'ICT302', semester: '4,5,6', isElective: true, prerequisite: '' },
-  { name: 'Software Defined Networks', unitCode: 'ICT311', semester: '4,5,6', isElective: true, prerequisite: '' },
-  { name: 'Advanced Topics in Web Development', unitCode: 'ICT312', semester: '4,5,6', isElective: true, prerequisite: '' },
+  // Available Elective Options (can be selected in Semester 1 to 6)
+  { name: 'Managing People and Culture', unitCode: 'BUS206', semester: '1,2,3,4,5,6', isElective: true, prerequisite: '' },
+  { name: 'Knowledge Management', unitCode: 'ICT207', semester: '1,2,3,4,5,6', isElective: true, prerequisite: '' },
+  { name: 'The Digital Economy', unitCode: 'BUS301', semester: '1,2,3,4,5,6', isElective: true, prerequisite: '' },
+  { name: 'Work-Integrated Learning (Internship)', unitCode: 'BUS307', semester: '1,2,3,4,5,6', isElective: true, prerequisite: '' },
+  { name: 'Distributed Computing', unitCode: 'ICT304', semester: '1,2,3,4,5,6', isElective: true, prerequisite: '' },
+  { name: 'Secure Software Development', unitCode: 'ICT302', semester: '1,2,3,4,5,6', isElective: true, prerequisite: '' },
+  { name: 'Software Defined Networks', unitCode: 'ICT311', semester: '1,2,3,4,5,6', isElective: true, prerequisite: '' },
+  { name: 'Advanced Topics in Web Development', unitCode: 'ICT312', semester: '1,2,3,4,5,6', isElective: true, prerequisite: '' },
 ];
 
 export function CourseManagement({ courses, onRefresh }: CourseManagementProps) {
+  const currentAcademicYear = new Date().getFullYear();
+  const semesterOptions = [
+    { value: '1', label: `${currentAcademicYear} - Semester 1` },
+    { value: '2', label: `${currentAcademicYear} - Semester 2` },
+    { value: '3', label: `${currentAcademicYear} - Semester 3` },
+    { value: '4', label: `${currentAcademicYear} - Semester 4` },
+    { value: '5', label: `${currentAcademicYear} - Semester 5` },
+    { value: '6', label: `${currentAcademicYear} - Semester 6` },
+  ];
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [currentCourse, setCurrentCourse] = useState<any>(null);
@@ -243,18 +252,16 @@ export function CourseManagement({ courses, onRefresh }: CourseManagementProps) 
               <div className="space-y-4 py-4">
                 {/* 1. Semester Selection - FIRST */}
                 <div className="space-y-2">
-                  <Label>Semester <span className="text-red-500">*</span></Label>
+                  <Label>Academic Semester (CIHE) <span className="text-red-500">*</span></Label>
+                  <p className="text-xs text-slate-500">Example: 2026 - Semester 1</p>
                   <Select value={semester} onValueChange={handleSemesterChange}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select semester first" />
+                      <SelectValue placeholder="Select academic semester first" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1">Semester 1</SelectItem>
-                      <SelectItem value="2">Semester 2</SelectItem>
-                      <SelectItem value="3">Semester 3</SelectItem>
-                      <SelectItem value="4">Semester 4</SelectItem>
-                      <SelectItem value="5">Semester 5</SelectItem>
-                      <SelectItem value="6">Semester 6</SelectItem>
+                      {semesterOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -268,7 +275,7 @@ export function CourseManagement({ courses, onRefresh }: CourseManagementProps) 
                     disabled={!semester}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder={semester ? "Select course" : "Select semester first"} />
+                      <SelectValue placeholder={semester ? "Select course" : "Select academic semester first"} />
                     </SelectTrigger>
                     <SelectContent>
                       {getAvailableCourses().map((course) => (
