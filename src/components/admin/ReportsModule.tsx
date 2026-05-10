@@ -143,33 +143,14 @@ export function ReportsModule({ students, units, enrollments }: ReportsModulePro
       };
     }).sort((a, b) => b.distinct - a.distinct);
 
-    let csvContent = 'CIHE PRE-ENROLMENT SYSTEM - STUDENT ATTENDANCE DAYS REPORT\n';
-    csvContent += `Generated: ${new Date().toLocaleString()}\n`;
-    csvContent += 'Target: 2 days/week  |  Acceptable: 3  |  Not Allowed: 4+\n\n';
-
-    const summary = { ok: 0, accept: 0, bad: 0, none: 0 };
+    const csvRows: (string | number)[][] = [[
+      'Student Name', 'CIHE ID', 'Email', 'Units Enrolled', 'Unit Codes',
+      'Distinct Days', 'Days', 'Status',
+    ]];
     rows.forEach(r => {
-      if (r.distinct === 0) summary.none++;
-      else if (r.distinct <= 2) summary.ok++;
-      else if (r.distinct === 3) summary.accept++;
-      else summary.bad++;
+      csvRows.push([r.name, r.ciheId, r.email, r.unitCount, r.units, r.distinct, r.days, r.status]);
     });
-    csvContent += `SUMMARY\nOK (<=2 days),${summary.ok}\nAcceptable (3 days),${summary.accept}\nNot Allowed (4+ days),${summary.bad}\nNo Enrollments,${summary.none}\n\n`;
-
-    csvContent += 'Student Name,CIHE ID,Email,Units Enrolled,Unit Codes,Distinct Days,Days,Status\n';
-    rows.forEach(r => {
-      csvContent += `"${r.name}",${r.ciheId},${r.email},${r.unitCount},"${r.units}",${r.distinct},"${r.days}",${r.status}\n`;
-    });
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `CIHE-Student-Attendance-Days-${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+    downloadCsv(`CIHE-Student-Attendance-Days-${new Date().toISOString().split('T')[0]}.csv`, csvRows);
     toast.success('Student Attendance Days report exported successfully!');
   };
 
