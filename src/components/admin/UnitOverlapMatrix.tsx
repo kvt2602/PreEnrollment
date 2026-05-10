@@ -65,7 +65,7 @@ export function UnitOverlapMatrix({ units, enrollments, students }: UnitOverlapM
   const anyOverlapPairs = pairCounts.length;
 
   const getOverlapColor = (count: number, unitA: string, unitB: string) => {
-    if (unitA === unitB) return 'bg-gray-800 text-white';
+    if (unitA === unitB) return 'bg-slate-800 text-white font-semibold';
     if (count === 0) return 'bg-gray-50 text-gray-400';
     if (count === 1) return 'bg-green-100 text-green-800';
     if (count === 2) return 'bg-yellow-100 text-yellow-800';
@@ -219,7 +219,8 @@ export function UnitOverlapMatrix({ units, enrollments, students }: UnitOverlapM
               <Info className="h-5 w-5 text-blue-600 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-blue-900 mb-2">How to Read This Matrix:</p>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
+                  <div className="flex items-center gap-2"><div className="w-6 h-6 bg-slate-800 border border-slate-900 rounded"></div><span className="text-gray-700">Unit Total (diagonal)</span></div>
                   <div className="flex items-center gap-2"><div className="w-6 h-6 bg-gray-50 border border-gray-200 rounded"></div><span className="text-gray-700">No Overlap (0)</span></div>
                   <div className="flex items-center gap-2"><div className="w-6 h-6 bg-green-100 border border-green-200 rounded"></div><span className="text-gray-700">Low (1)</span></div>
                   <div className="flex items-center gap-2"><div className="w-6 h-6 bg-yellow-100 border border-yellow-200 rounded"></div><span className="text-gray-700">Medium (2)</span></div>
@@ -259,7 +260,9 @@ export function UnitOverlapMatrix({ units, enrollments, students }: UnitOverlapM
                           <td
                             key={unitB.id}
                             className={`border border-gray-300 p-2 text-center text-xs font-medium transition-opacity ${isClickable ? 'cursor-pointer hover:ring-2 hover:ring-blue-400 hover:ring-inset hover:opacity-80' : ''} ${colorClass}`}
-                            title={`${unitA.unitCode} ↔ ${unitB.unitCode}: ${count} student${count !== 1 ? 's' : ''}${isClickable ? ' — click to see names' : ''}`}
+                            title={unitA.id === unitB.id
+                              ? `${unitA.unitCode}: ${count} student${count !== 1 ? 's' : ''} enrolled (total)`
+                              : `${unitA.unitCode} ↔ ${unitB.unitCode}: ${count} student${count !== 1 ? 's' : ''}${isClickable ? ' — click to see names' : ''}`}
                             onMouseEnter={() => setShowTooltip({ unitA: unitA.unitCode, unitB: unitB.unitCode, count })}
                             onMouseLeave={() => setShowTooltip(null)}
                             onClick={() => {
@@ -268,7 +271,7 @@ export function UnitOverlapMatrix({ units, enrollments, students }: UnitOverlapM
                               setSelectedPair({ unitACode: unitA.unitCode, unitAName: unitA.name, unitBCode: unitB.unitCode, unitBName: unitB.name, emails });
                             }}
                           >
-                            {unitA.id === unitB.id ? '—' : count}
+                            {count}
                           </td>
                         );
                       })}
