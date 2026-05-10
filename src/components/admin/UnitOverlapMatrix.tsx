@@ -255,13 +255,14 @@ export function UnitOverlapMatrix({ units, enrollments, students }: UnitOverlapM
                       {units.map(unitB => {
                         const count = matrix[unitA.id]?.[unitB.id]?.size || 0;
                         const colorClass = getOverlapColor(count, unitA.id, unitB.id);
-                        const isClickable = unitA.id !== unitB.id && count > 0;
+                        const isClickable = count > 0;
+                        const isDiagonal = unitA.id === unitB.id;
                         return (
                           <td
                             key={unitB.id}
                             className={`border border-gray-300 p-2 text-center text-xs font-medium transition-opacity ${isClickable ? 'cursor-pointer hover:ring-2 hover:ring-blue-400 hover:ring-inset hover:opacity-80' : ''} ${colorClass}`}
-                            title={unitA.id === unitB.id
-                              ? `${unitA.unitCode}: ${count} student${count !== 1 ? 's' : ''} enrolled (total)`
+                            title={isDiagonal
+                              ? `${unitA.unitCode}: ${count} student${count !== 1 ? 's' : ''} enrolled (total)${isClickable ? ' — click to see names' : ''}`
                               : `${unitA.unitCode} ↔ ${unitB.unitCode}: ${count} student${count !== 1 ? 's' : ''}${isClickable ? ' — click to see names' : ''}`}
                             onMouseEnter={() => setShowTooltip({ unitA: unitA.unitCode, unitB: unitB.unitCode, count })}
                             onMouseLeave={() => setShowTooltip(null)}
@@ -287,19 +288,19 @@ export function UnitOverlapMatrix({ units, enrollments, students }: UnitOverlapM
             <DialogContent className="max-w-2xl">
               {selectedPair && (() => {
                 const studentDetails = getStudentDetails(selectedPair.emails);
+                const isSelf = selectedPair.unitACode === selectedPair.unitBCode;
                 return (
                   <>
                     <DialogHeader>
                       <DialogTitle className="flex items-center gap-2">
                         <Users className="h-5 w-5 text-blue-600" />
-                        Overlapping Students
+                        {isSelf ? 'Enrolled Students' : 'Overlapping Students'}
                         <Badge variant="outline" className="ml-1">{selectedPair.unitACode}</Badge>
-                        <span className="text-blue-600">↔</span>
-                        <Badge variant="outline">{selectedPair.unitBCode}</Badge>
+                        {!isSelf && (<><span className="text-blue-600">↔</span><Badge variant="outline">{selectedPair.unitBCode}</Badge></>)}
                         <span className="ml-2 text-sm font-normal text-blue-700">({studentDetails.length} student{studentDetails.length !== 1 ? 's' : ''})</span>
                       </DialogTitle>
                       <DialogDescription>
-                        {selectedPair.unitAName} &amp; {selectedPair.unitBName}
+                        {isSelf ? selectedPair.unitAName : `${selectedPair.unitAName} & ${selectedPair.unitBName}`}
                       </DialogDescription>
                     </DialogHeader>
                     <div className="max-h-[60vh] overflow-y-auto">
