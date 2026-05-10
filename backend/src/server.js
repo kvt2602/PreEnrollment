@@ -348,8 +348,9 @@ app.post('/api/preferences', async (req, res) => {
   if (!isValidEmail(studentEmail)) {
     return res.status(400).json({ message: 'Invalid student email format' });
   }
-  if (!['morning', 'evening'].includes(timePreference.toLowerCase())) {
-    return res.status(400).json({ message: 'Time preference must be morning or evening' });
+  const allowedTimeSlots = ['8:15-11:15', '11:30-14:30', '14:45-17:45', '18:00-21:00', 'morning', 'evening'];
+  if (!allowedTimeSlots.includes(timePreference.toLowerCase())) {
+    return res.status(400).json({ message: 'Invalid time preference' });
   }
 
   // Build a simple unique ID from the student, course, and submission time.
