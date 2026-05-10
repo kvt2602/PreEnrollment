@@ -35,114 +35,87 @@ export function ReportsModule({ students, units, enrollments }: ReportsModulePro
     };
   };
 
-  // REPORT 1: Student Enrollment Report
-  const exportStudentEnrollmentReport = () => {
-    let csvContent = '====================================================================\n';
-    csvContent += 'CIHE PRE-ENROLMENT SYSTEM\n';
-    csvContent += 'STUDENT ENROLLMENT REPORT\n';
-    csvContent += '====================================================================\n';
-    csvContent += `Report Generated: ${new Date().toLocaleString()}\n`;
-    csvContent += `Academic Year: 2025-2026\n`;
-    csvContent += `Total Students: ${students.length}\n`;
-    csvContent += `Total Enrollments: ${enrollments.length}\n`;
-    csvContent += '====================================================================\n\n';
-    
-    csvContent += 'DETAILED STUDENT ENROLLMENT LIST\n\n';
-    
-    students.forEach((student, index) => {
-      const studentEnrollments = getStudentEnrollments(student.email);
-      
-      csvContent += `${index + 1}. STUDENT PROFILE\n`;
-      csvContent += `${'='.repeat(70)}\n`;
-      csvContent += `Full Name: ${student.name}\n`;
-      csvContent += `CIHE ID: ${student.ciheId}\n`;
-      csvContent += `Email: ${student.email}\n`;
-      csvContent += `Total Units Enrolled: ${studentEnrollments.length}\n`;
-      csvContent += `\n`;
-      
-      if (studentEnrollments.length > 0) {
-        csvContent += `ENROLLED UNITS:\n`;
-        csvContent += `${'-'.repeat(70)}\n`;
-        csvContent += `Unit Code | Unit Name                                    | Day       | Time\n`;
-        csvContent += `${'-'.repeat(70)}\n`;
-        
-        studentEnrollments.forEach(e => {
-          const unitCode = getUnitCode(e.courseId).padEnd(9);
-          const unitName = getUnitName(e.courseId).substring(0, 44).padEnd(44);
-          const day = e.dayPreference.padEnd(9);
-          const time = e.timePreference;
-          csvContent += `${unitCode} | ${unitName} | ${day} | ${time}\n`;
-        });
-      } else {
-        csvContent += `NO UNITS ENROLLED\n`;
-      }
-      csvContent += `\n\n`;
-    });
-    
-    csvContent += '====================================================================\n';
-    csvContent += 'SUMMARY STATISTICS\n';
-    csvContent += '====================================================================\n';
-    const avgUnits = (enrollments.length / students.length).toFixed(2);
-    const maxUnits = Math.max(...students.map(s => getStudentEnrollments(s.email).length));
-    const studentsWithNoEnrollments = students.filter(s => getStudentEnrollments(s.email).length === 0).length;
-    
-    csvContent += `Average Units per Student: ${avgUnits}\n`;
-    csvContent += `Maximum Units by One Student: ${maxUnits}\n`;
-    csvContent += `Students with No Enrollments: ${studentsWithNoEnrollments}\n`;
-    csvContent += `Students with Enrollments: ${students.length - studentsWithNoEnrollments}\n`;
-    csvContent += '====================================================================\n';
-    
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  // CSV cell escaper: wrap in quotes if value contains comma, quote, or newline; double internal quotes.
+  const csv = (v: any): string => {
+    const s = v === null || v === undefined ? '' : String(v);
+    return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+
+  const downloadCsv = (filename: string, rows: (string | number)[][]) => {
+    const csvContent = rows.map(r => r.map(csv).join(',')).join('\r\n');
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `CIHE-Student-Enrollment-Report-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
+  };
+
+  // REPORT 1: Student Enrollment Report (flat tabular: 1 row per enrollment)
+  const exportStudentEnrollmentReport = () => {
+    const rows: (string | number)[][] = [[
+      'Student #', 'Student Name', 'CIHE ID', 'Email', 'Total Units',
+      'Unit Code', 'Unit Name', 'Day', 'Time',
+    ]];
+    students.forEach((student, idx) => {
+      const enr = getStudentEnrollments(student.email);
+      if (enr.length === 0) {
+        rows.push([idx + 1, student.name, student.ciheId || 'N/A', student.email, 0, '', '', '', '']);
+        return;
+      }
+      enr.forEach(e => {
+        rows.push([
+          idx + 1,
+          student.name,
+          student.ciheId || 'N/A',
+          student.email,
+          enr.length,
+          getUnitCode(e.courseId),
+          getUnitName(e.courseId),
+          e.dayPreference || '',
+          e.timePreference || '',
+        ]);
+      });
+    });
+    downloadCsv(`CIHE-Student-Enrollment-Report-${new Date().toISOString().split('T')[0]}.csv`, rows);
     toast.success('Student Enrollment Report exported successfully!');
   };
 
 
-  // REPORT 4: Unit Enrollment List (per unit roster + totals)
+  // REPORT 4: Unit Enrollment List (flat tabular: 1 row per enrollment)
   const exportUnitEnrollmentList = () => {
-    let csvContent = 'CIHE PRE-ENROLMENT SYSTEM - UNIT ENROLLMENT LIST\n';
-    csvContent += `Generated: ${new Date().toLocaleString()}\n`;
-    csvContent += `Total Units: ${units.length}\n`;
-    csvContent += `Total Enrollments: ${enrollments.length}\n\n`;
+    const totals = new Map<string, number>();
+    units.forEach(u => totals.set(u.id, enrollments.filter(e => e.courseId === u.id).length));
 
-    // Flat CSV section (machine-readable)
-    csvContent += 'Unit Code,Unit Name,Student #,Student Name,CIHE ID,Email,Day,Time\n';
+    const rows: (string | number)[][] = [[
+      'Unit Code', 'Unit Name', 'Total in Unit',
+      'Student Name', 'CIHE ID', 'Email', 'Day', 'Time',
+    ]];
     units.forEach(unit => {
-      const rows = enrollments.filter(e => e.courseId === unit.id);
-      if (rows.length === 0) {
-        csvContent += `${unit.unitCode},"${unit.name}",,,,,,\n`;
+      const enr = enrollments.filter(e => e.courseId === unit.id);
+      const total = totals.get(unit.id) || 0;
+      if (enr.length === 0) {
+        rows.push([unit.unitCode, unit.name, total, '', '', '', '', '']);
         return;
       }
-      rows.forEach((e, idx) => {
+      enr.forEach(e => {
         const u = getUserDetails(e.studentEmail);
-        csvContent += `${unit.unitCode},"${unit.name}",${idx + 1},"${u.name}",${u.ciheId},${u.email},${e.dayPreference || ''},${e.timePreference || ''}\n`;
+        rows.push([
+          unit.unitCode,
+          unit.name,
+          total,
+          u.name,
+          u.ciheId,
+          u.email,
+          e.dayPreference || '',
+          e.timePreference || '',
+        ]);
       });
     });
-
-    csvContent += '\n\nUNIT TOTALS\nUnit Code,Unit Name,Students Enrolled\n';
-    units
-      .map(u => ({ u, c: enrollments.filter(e => e.courseId === u.id).length }))
-      .sort((a, b) => b.c - a.c)
-      .forEach(({ u, c }) => {
-        csvContent += `${u.unitCode},"${u.name}",${c}\n`;
-      });
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `CIHE-Unit-Enrollment-List-${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+    downloadCsv(`CIHE-Unit-Enrollment-List-${new Date().toISOString().split('T')[0]}.csv`, rows);
     toast.success('Unit Enrollment List exported successfully!');
   };
 
