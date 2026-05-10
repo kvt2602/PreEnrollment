@@ -2,7 +2,8 @@ import { useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { Download, AlertTriangle, Info, BookOpen, Users, TrendingUp, X } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
+import { Download, AlertTriangle, Info, BookOpen, Users, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface UnitOverlapMatrixProps {
@@ -278,54 +279,53 @@ export function UnitOverlapMatrix({ units, enrollments, students }: UnitOverlapM
             </div>
           </div>
 
-          {/* Overlapping Student Detail Panel */}
-          {selectedPair && (() => {
-            const studentDetails = getStudentDetails(selectedPair.emails);
-            return (
-              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-start gap-2 flex-1">
-                    <Users className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-blue-900 mb-1">
-                        Overlapping Students:&nbsp;
-                        <Badge variant="outline" className="mr-1">{selectedPair.unitACode}</Badge>
+          {/* Overlapping Student Detail Modal */}
+          <Dialog open={!!selectedPair} onOpenChange={(open) => { if (!open) setSelectedPair(null); }}>
+            <DialogContent className="max-w-2xl">
+              {selectedPair && (() => {
+                const studentDetails = getStudentDetails(selectedPair.emails);
+                return (
+                  <>
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2">
+                        <Users className="h-5 w-5 text-blue-600" />
+                        Overlapping Students
+                        <Badge variant="outline" className="ml-1">{selectedPair.unitACode}</Badge>
                         <span className="text-blue-600">↔</span>
-                        <Badge variant="outline" className="ml-1">{selectedPair.unitBCode}</Badge>
-                        <span className="ml-2 text-blue-700">({studentDetails.length} student{studentDetails.length !== 1 ? 's' : ''})</span>
-                      </p>
-                      <p className="text-xs text-blue-700 mb-3">{selectedPair.unitAName} &amp; {selectedPair.unitBName}</p>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-sm border-collapse">
-                          <thead>
-                            <tr className="border-b border-blue-200">
-                              <th className="text-left py-1.5 pr-4 text-xs font-semibold text-blue-800 uppercase tracking-wide">#</th>
-                              <th className="text-left py-1.5 pr-4 text-xs font-semibold text-blue-800 uppercase tracking-wide">Student Name</th>
-                              <th className="text-left py-1.5 pr-4 text-xs font-semibold text-blue-800 uppercase tracking-wide">CIHE ID</th>
-                              <th className="text-left py-1.5 text-xs font-semibold text-blue-800 uppercase tracking-wide">Email</th>
+                        <Badge variant="outline">{selectedPair.unitBCode}</Badge>
+                        <span className="ml-2 text-sm font-normal text-blue-700">({studentDetails.length} student{studentDetails.length !== 1 ? 's' : ''})</span>
+                      </DialogTitle>
+                      <DialogDescription>
+                        {selectedPair.unitAName} &amp; {selectedPair.unitBName}
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="max-h-[60vh] overflow-y-auto">
+                      <table className="w-full text-sm border-collapse">
+                        <thead>
+                          <tr className="border-b border-slate-200">
+                            <th className="text-left py-2 pr-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">#</th>
+                            <th className="text-left py-2 pr-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Student Name</th>
+                            <th className="text-left py-2 pr-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">CIHE ID</th>
+                            <th className="text-left py-2 text-xs font-semibold text-slate-600 uppercase tracking-wide">Email</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {studentDetails.map((s, idx) => (
+                            <tr key={s.email} className="border-b border-slate-100 last:border-0">
+                              <td className="py-1.5 pr-4 text-blue-600 font-medium">{idx + 1}</td>
+                              <td className="py-1.5 pr-4 font-medium text-slate-800">{s.name}</td>
+                              <td className="py-1.5 pr-4"><Badge variant="outline" className="text-[10px] font-mono">{s.ciheId}</Badge></td>
+                              <td className="py-1.5 text-slate-500 text-xs">{s.email}</td>
                             </tr>
-                          </thead>
-                          <tbody>
-                            {studentDetails.map((s, idx) => (
-                              <tr key={s.email} className="border-b border-blue-100 last:border-0">
-                                <td className="py-1.5 pr-4 text-blue-600 font-medium">{idx + 1}</td>
-                                <td className="py-1.5 pr-4 font-medium text-slate-800">{s.name}</td>
-                                <td className="py-1.5 pr-4"><Badge variant="outline" className="text-[10px] font-mono">{s.ciheId}</Badge></td>
-                                <td className="py-1.5 text-slate-500 text-xs">{s.email}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
-                  </div>
-                  <button onClick={() => setSelectedPair(null)} className="ml-2 p-1 rounded hover:bg-blue-100 text-blue-500 hover:text-blue-700 transition-colors shrink-0" title="Close">
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            );
-          })()}
+                  </>
+                );
+              })()}
+            </DialogContent>
+          </Dialog>
 
           {/* High Overlap Warning */}
           {(() => {
