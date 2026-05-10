@@ -4,7 +4,7 @@ import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { Download, Search, BookOpen, Users, TrendingUp, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Search, BookOpen, Users, TrendingUp, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface UnitManagementProps {
@@ -72,26 +72,6 @@ export function UnitManagement({ units, enrollments }: UnitManagementProps) {
       return dir * (demandOrder[getDemandLevel(a.enrollmentCount)] - demandOrder[getDemandLevel(b.enrollmentCount)]);
     });
 
-  const exportUnitReport = () => {
-    let csvContent = 'CIHE PRE-ENROLMENT SYSTEM - UNIT MANAGEMENT REPORT\\n';
-    csvContent += `Generated: ${new Date().toLocaleString()}\\n\\n`;
-    csvContent += 'Unit Name,Unit Code,Students Enrolled,Semester,Demand Level\\n';
-    [...unitsWithStats].sort((a, b) => b.enrollmentCount - a.enrollmentCount).forEach(unit => {
-      const d = getDemandLevel(unit.enrollmentCount);
-      csvContent += `"${unit.name}",${unit.unitCode},${unit.enrollmentCount},${unit.semester || 'N/A'},${d.charAt(0).toUpperCase() + d.slice(1)}\\n`;
-    });
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `unit-management-${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-    toast.success('Unit report exported successfully!');
-  };
-
   return (
     <div className="space-y-6">
       {/* Summary stat cards */}
@@ -158,14 +138,6 @@ export function UnitManagement({ units, enrollments }: UnitManagementProps) {
               <CardTitle>All Units</CardTitle>
               <CardDescription>Complete list of units with enrollment statistics</CardDescription>
             </div>
-            <Button
-              onClick={exportUnitReport}
-              className="border border-blue-800/45 bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white hover:brightness-110"
-              size="sm"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Generate Report
-            </Button>
           </div>
         </CardHeader>
         <CardContent>

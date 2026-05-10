@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { Download, FileText, Users, Calendar, TrendingUp, Grid, BookOpen } from 'lucide-react';
+import { Download, FileText, Users, Calendar, TrendingUp, Grid, BookOpen, ListChecks, CalendarDays } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ReportsModuleProps {
@@ -104,218 +104,100 @@ export function ReportsModule({ students, units, enrollments }: ReportsModulePro
     toast.success('Student Enrollment Report exported successfully!');
   };
 
-  // REPORT 2: Students with Multiple Units
-  const exportMultipleUnitsReport = () => {
-    const studentsWithMultipleUnits = students
-      .map(student => ({
-        ...student,
-        enrollments: getStudentEnrollments(student.email),
-      }))
-      .filter(s => s.enrollments.length >= 2)
-      .sort((a, b) => b.enrollments.length - a.enrollments.length);
-    
-    let csvContent = '====================================================================\n';
-    csvContent += 'CIHE PRE-ENROLMENT SYSTEM\n';
-    csvContent += 'STUDENTS WITH MULTIPLE UNIT ENROLLMENTS\n';
-    csvContent += '====================================================================\n';
-    csvContent += `Report Generated: ${new Date().toLocaleString()}\n`;
-    csvContent += `Total Students with Multiple Units: ${studentsWithMultipleUnits.length}\n`;
-    csvContent += '====================================================================\n\n';
-    
-    if (studentsWithMultipleUnits.length === 0) {
-      csvContent += 'NO STUDENTS WITH MULTIPLE UNIT ENROLLMENTS FOUND\n';
-    } else {
-      csvContent += 'STUDENT LIST (Sorted by Number of Units - Highest First)\n\n';
-      
-      studentsWithMultipleUnits.forEach((student, index) => {
-        csvContent += `${index + 1}. ${student.name}\n`;
-        csvContent += `${'='.repeat(70)}\n`;
-        csvContent += `CIHE ID: ${student.ciheId}\n`;
-        csvContent += `Email: ${student.email}\n`;
-        csvContent += `Total Units: ${student.enrollments.length}\n`;
-        csvContent += `\n`;
-        csvContent += `ENROLLED UNITS WITH SCHEDULE:\n`;
-        csvContent += `${'-'.repeat(70)}\n`;
-        
-        student.enrollments.forEach((e, idx) => {
-          csvContent += `  ${idx + 1}. [${getUnitCode(e.courseId)}] ${getUnitName(e.courseId)}\n`;
-          csvContent += `     Schedule: ${e.dayPreference} at ${e.timePreference}\n`;
-        });
-        
-        csvContent += `\n\n`;
+
+  // REPORT 4: Unit Enrollment List (per unit roster + totals)
+  const exportUnitEnrollmentList = () => {
+    let csvContent = 'CIHE PRE-ENROLMENT SYSTEM - UNIT ENROLLMENT LIST\n';
+    csvContent += `Generated: ${new Date().toLocaleString()}\n`;
+    csvContent += `Total Units: ${units.length}\n`;
+    csvContent += `Total Enrollments: ${enrollments.length}\n\n`;
+
+    // Flat CSV section (machine-readable)
+    csvContent += 'Unit Code,Unit Name,Student #,Student Name,CIHE ID,Email,Day,Time\n';
+    units.forEach(unit => {
+      const rows = enrollments.filter(e => e.courseId === unit.id);
+      if (rows.length === 0) {
+        csvContent += `${unit.unitCode},"${unit.name}",,,,,,\n`;
+        return;
+      }
+      rows.forEach((e, idx) => {
+        const u = getUserDetails(e.studentEmail);
+        csvContent += `${unit.unitCode},"${unit.name}",${idx + 1},"${u.name}",${u.ciheId},${u.email},${e.dayPreference || ''},${e.timePreference || ''}\n`;
       });
-      
-      csvContent += '====================================================================\n';
-      csvContent += 'DISTRIBUTION ANALYSIS\n';
-      csvContent += '====================================================================\n';
-      const distribution = {};
-      studentsWithMultipleUnits.forEach(s => {
-        const count = s.enrollments.length;
-        distribution[count] = (distribution[count] || 0) + 1;
+    });
+
+    csvContent += '\n\nUNIT TOTALS\nUnit Code,Unit Name,Students Enrolled\n';
+    units
+      .map(u => ({ u, c: enrollments.filter(e => e.courseId === u.id).length }))
+      .sort((a, b) => b.c - a.c)
+      .forEach(({ u, c }) => {
+        csvContent += `${u.unitCode},"${u.name}",${c}\n`;
       });
-      
-      Object.keys(distribution).sort((a, b) => b - a).forEach(count => {
-        csvContent += `${count} units: ${distribution[count]} students\n`;
-      });
-    }
-    
-    csvContent += '====================================================================\n';
-    
+
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `CIHE-Multiple-Units-Report-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `CIHE-Unit-Enrollment-List-${new Date().toISOString().split('T')[0]}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
-    toast.success('Multiple Units Report exported successfully!');
+    toast.success('Unit Enrollment List exported successfully!');
   };
 
-  // REPORT 3: Unit Popularity Report
-  const exportUnitPopularityReport = () => {
-    const unitStats = units.map(unit => {
-      const unitEnrollments = enrollments.filter(e => e.courseId === unit.id);
-      const enrollmentCount = unitEnrollments.length;
-      
-      // Time slot analysis
-      const timeSlotBreakdown = {
-        '8:15-11:15': 0,
-        '11:30-14:30': 0,
-        '14:45-17:45': 0,
-        '18:00-21:00': 0
-      };
-      
-      // Day analysis
-      const dayBreakdown = {
-        'Monday': 0,
-        'Tuesday': 0,
-        'Wednesday': 0,
-        'Thursday': 0,
-        'Friday': 0
-      };
-      
-      unitEnrollments.forEach(e => {
-        if (timeSlotBreakdown[e.timePreference] !== undefined) {
-          timeSlotBreakdown[e.timePreference]++;
-        }
-        if (dayBreakdown[e.dayPreference] !== undefined) {
-          dayBreakdown[e.dayPreference]++;
-        }
-      });
-      
+  // REPORT 5: Student Attendance Days (distinct day count per student)
+  const exportAttendanceDaysReport = () => {
+    const rows = students.map(student => {
+      const enr = enrollments.filter(e => e.studentEmail === student.email);
+      const days = new Set<string>();
+      enr.forEach(e => { if (e.dayPreference) days.add(e.dayPreference); });
+      const distinct = days.size;
+      let status: string;
+      if (distinct === 0) status = 'No Enrollments';
+      else if (distinct <= 2) status = 'OK (Target)';
+      else if (distinct === 3) status = 'Acceptable';
+      else status = 'Not Allowed (4+)';
       return {
-        ...unit,
-        enrollmentCount,
-        timeSlotBreakdown,
-        dayBreakdown,
-        students: unitEnrollments.map(e => getUserDetails(e.studentEmail))
+        name: student.name,
+        ciheId: student.ciheId || 'N/A',
+        email: student.email,
+        unitCount: enr.length,
+        units: enr.map(e => getUnitCode(e.courseId)).join('; '),
+        days: Array.from(days).join('; '),
+        distinct,
+        status,
       };
-    }).sort((a, b) => b.enrollmentCount - a.enrollmentCount);
-    
-    let csvContent = '====================================================================\n';
-    csvContent += 'CIHE PRE-ENROLMENT SYSTEM\n';
-    csvContent += 'UNIT POPULARITY & DEMAND ANALYSIS REPORT\n';
-    csvContent += '====================================================================\n';
-    csvContent += `Report Generated: ${new Date().toLocaleString()}\n`;
-    csvContent += `Academic Year: 2025-2026\n`;
-    csvContent += `Total Units Available: ${units.length}\n`;
-    csvContent += `Total Student Enrollments: ${enrollments.length}\n`;
-    csvContent += '====================================================================\n\n';
-    
-    const avgEnrollment = unitStats.reduce((sum, u) => sum + u.enrollmentCount, 0) / unitStats.length;
-    
-    csvContent += 'OVERALL STATISTICS\n';
-    csvContent += `${'-'.repeat(70)}\n`;
-    csvContent += `Average Enrollment per Unit: ${avgEnrollment.toFixed(2)} students\n`;
-    csvContent += `Most Popular Unit: ${unitStats[0]?.unitCode} (${unitStats[0]?.enrollmentCount} students)\n`;
-    csvContent += `Least Popular Unit: ${unitStats[unitStats.length - 1]?.unitCode} (${unitStats[unitStats.length - 1]?.enrollmentCount} students)\n`;
-    csvContent += `\n\n`;
-    
-    csvContent += 'DETAILED UNIT ANALYSIS\n';
-    csvContent += '====================================================================\n\n';
-    
-    unitStats.forEach((unit, index) => {
-      const popularityLevel = unit.enrollmentCount > avgEnrollment ? '★★★ HIGH DEMAND' :
-                             unit.enrollmentCount > 0 ? '★★ MEDIUM DEMAND' : '★ LOW DEMAND';
-      
-      csvContent += `${index + 1}. ${unit.unitCode} - ${unit.name}\n`;
-      csvContent += `${'='.repeat(70)}\n`;
-      csvContent += `Semester: ${unit.semester || 'N/A'}\n`;
-      csvContent += `Total Students Enrolled: ${unit.enrollmentCount}\n`;
-      csvContent += `Popularity Level: ${popularityLevel}\n`;
-      csvContent += `Demand vs Average: ${unit.enrollmentCount > avgEnrollment ? '+' : ''}${(unit.enrollmentCount - avgEnrollment).toFixed(1)} students\n`;
-      csvContent += `\n`;
-      
-      // Time Slot Preferences
-      csvContent += `PREFERRED TIME SLOTS:\n`;
-      csvContent += `${'-'.repeat(70)}\n`;
-      Object.entries(unit.timeSlotBreakdown).forEach(([time, count]) => {
-        const percentage = unit.enrollmentCount > 0 ? ((count / unit.enrollmentCount) * 100).toFixed(1) : '0.0';
-        const bar = '█'.repeat(Math.round(count / 2)) || '-';
-        csvContent += `  ${time.padEnd(15)} | ${String(count).padStart(3)} students (${percentage.padStart(5)}%) ${bar}\n`;
-      });
-      csvContent += `\n`;
-      
-      // Day Preferences
-      csvContent += `PREFERRED DAYS:\n`;
-      csvContent += `${'-'.repeat(70)}\n`;
-      Object.entries(unit.dayBreakdown).forEach(([day, count]) => {
-        const percentage = unit.enrollmentCount > 0 ? ((count / unit.enrollmentCount) * 100).toFixed(1) : '0.0';
-        const bar = '█'.repeat(Math.round(count / 2)) || '-';
-        csvContent += `  ${day.padEnd(12)} | ${String(count).padStart(3)} students (${percentage.padStart(5)}%) ${bar}\n`;
-      });
-      csvContent += `\n`;
-      
-      // List of Students
-      if (unit.students.length > 0) {
-        csvContent += `ENROLLED STUDENTS:\n`;
-        csvContent += `${'-'.repeat(70)}\n`;
-        unit.students.forEach((student, idx) => {
-          csvContent += `  ${idx + 1}. ${student.name} (${student.ciheId}) - ${student.email}\n`;
-        });
-      } else {
-        csvContent += `NO STUDENTS ENROLLED\n`;
-      }
-      
-      csvContent += `\n\n`;
+    }).sort((a, b) => b.distinct - a.distinct);
+
+    let csvContent = 'CIHE PRE-ENROLMENT SYSTEM - STUDENT ATTENDANCE DAYS REPORT\n';
+    csvContent += `Generated: ${new Date().toLocaleString()}\n`;
+    csvContent += 'Target: 2 days/week  |  Acceptable: 3  |  Not Allowed: 4+\n\n';
+
+    const summary = { ok: 0, accept: 0, bad: 0, none: 0 };
+    rows.forEach(r => {
+      if (r.distinct === 0) summary.none++;
+      else if (r.distinct <= 2) summary.ok++;
+      else if (r.distinct === 3) summary.accept++;
+      else summary.bad++;
     });
-    
-    csvContent += '====================================================================\n';
-    csvContent += 'RECOMMENDATIONS\n';
-    csvContent += '====================================================================\n';
-    const highDemandUnits = unitStats.filter(u => u.enrollmentCount > avgEnrollment * 1.5);
-    const lowDemandUnits = unitStats.filter(u => u.enrollmentCount === 0);
-    
-    if (highDemandUnits.length > 0) {
-      csvContent += `\nHIGH DEMAND UNITS (Consider Additional Sections):\n`;
-      highDemandUnits.forEach(u => {
-        csvContent += `  - ${u.unitCode}: ${u.name} (${u.enrollmentCount} students)\n`;
-      });
-    }
-    
-    if (lowDemandUnits.length > 0) {
-      csvContent += `\nZERO ENROLLMENT UNITS (Review Offering):\n`;
-      lowDemandUnits.forEach(u => {
-        csvContent += `  - ${u.unitCode}: ${u.name}\n`;
-      });
-    }
-    
-    csvContent += '====================================================================\n';
-    csvContent += 'END OF REPORT\n';
-    csvContent += '====================================================================\n';
-    
+    csvContent += `SUMMARY\nOK (<=2 days),${summary.ok}\nAcceptable (3 days),${summary.accept}\nNot Allowed (4+ days),${summary.bad}\nNo Enrollments,${summary.none}\n\n`;
+
+    csvContent += 'Student Name,CIHE ID,Email,Units Enrolled,Unit Codes,Distinct Days,Days,Status\n';
+    rows.forEach(r => {
+      csvContent += `"${r.name}",${r.ciheId},${r.email},${r.unitCount},"${r.units}",${r.distinct},"${r.days}",${r.status}\n`;
+    });
+
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `CIHE-Unit-Popularity-Report-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `CIHE-Student-Attendance-Days-${new Date().toISOString().split('T')[0]}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
-    toast.success('Unit Popularity Report exported successfully!');
+    toast.success('Student Attendance Days report exported successfully!');
   };
 
   // Summary data
@@ -426,25 +308,26 @@ export function ReportsModule({ students, units, enrollments }: ReportsModulePro
               </CardContent>
             </Card>
 
-            {/* Report 2 */}
+            {/* Report 2: Unit Enrollment List */}
             <Card className="border-2">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2 mb-2">
-                  <Users className="h-5 w-5 text-green-600" />
-                  <CardTitle className="text-base">Students with Multiple Units</CardTitle>
+                  <ListChecks className="h-5 w-5 text-purple-600" />
+                  <CardTitle className="text-base">Unit Enrollment List</CardTitle>
                 </div>
                 <CardDescription className="text-sm">
-                  Students enrolled in 2 or more units
+                  Per-unit student rosters plus enrolment totals
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Total Students:</span>
-                    <Badge className="bg-green-600">{studentsWithMultipleUnits.length}</Badge>
+                  <div className="text-sm text-gray-600">
+                    <p>• Students enrolled in each unit</p>
+                    <p>• Day &amp; time preferences</p>
+                    <p>• Totals per unit (ranked)</p>
                   </div>
                   <Button
-                    onClick={exportMultipleUnitsReport}
+                    onClick={exportUnitEnrollmentList}
                     className="w-full border border-blue-800/45 bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white hover:brightness-110"
                     size="sm"
                   >
@@ -455,29 +338,26 @@ export function ReportsModule({ students, units, enrollments }: ReportsModulePro
               </CardContent>
             </Card>
 
-            {/* Report 3 */}
+            {/* Report 5: Student Attendance Days */}
             <Card className="border-2">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="h-5 w-5 text-orange-600" />
-                  <CardTitle className="text-base">Unit Popularity Report</CardTitle>
+                  <CalendarDays className="h-5 w-5 text-red-600" />
+                  <CardTitle className="text-base">Student Attendance Days</CardTitle>
                 </div>
                 <CardDescription className="text-sm">
-                  Units ranked by student enrollment
+                  Distinct campus days per student (target 2, max 3)
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="text-sm text-gray-600">
-                    <p className="font-medium">Top 3 Units:</p>
-                    {unitStats.slice(0, 3).map((unit, idx) => (
-                      <p key={idx}>
-                        {idx + 1}. {unit.unitCode} ({unit.count} students)
-                      </p>
-                    ))}
+                    <p>• Distinct day count per student</p>
+                    <p>• Status: OK / Acceptable / Not Allowed</p>
+                    <p>• Summary totals</p>
                   </div>
                   <Button
-                    onClick={exportUnitPopularityReport}
+                    onClick={exportAttendanceDaysReport}
                     className="w-full border border-blue-800/45 bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white hover:brightness-110"
                     size="sm"
                   >

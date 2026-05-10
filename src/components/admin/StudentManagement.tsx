@@ -4,7 +4,7 @@ import { Input } from '../ui/input';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { Search, Download, Users, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Search, Users, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface StudentManagementProps {
@@ -79,31 +79,6 @@ export function StudentManagement({ students, enrollments, units }: StudentManag
     return { label: `${count} Units`, className: 'bg-green-100 text-green-700 border border-green-200' };
   };
 
-  const exportStudentList = () => {
-    let csvContent = 'CIHE PRE-ENROLMENT SYSTEM - STUDENT LIST\\n';
-    csvContent += `Generated: ${new Date().toLocaleString()}\\n\\n`;
-    csvContent += 'Student Name,CIHE ID,Email,Role,Units Enrolled,Unit Details\\n';
-
-    students.forEach(student => {
-      const studentEnrollments = getStudentEnrollments(student.email);
-      const unitDetails = studentEnrollments
-        .map(e => `${getUnitCode(e.courseId)}: ${getUnitName(e.courseId)}`)
-        .join(' | ');
-      csvContent += `"${student.name}",${student.ciheId},${student.email},${student.role},${studentEnrollments.length},"${unitDetails}"\\n`;
-    });
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `student-list-${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-    toast.success('Student list exported successfully!');
-  };
-
   return (
     <div className="space-y-6">
       {/* Main table card */}
@@ -114,14 +89,6 @@ export function StudentManagement({ students, enrollments, units }: StudentManag
               <CardTitle>Student Management</CardTitle>
               <CardDescription>View and search all registered students</CardDescription>
             </div>
-            <Button
-              onClick={exportStudentList}
-              className="border border-blue-800/45 bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white hover:brightness-110"
-              size="sm"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Export List
-            </Button>
           </div>
         </CardHeader>
         <CardContent>

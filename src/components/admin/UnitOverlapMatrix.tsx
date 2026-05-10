@@ -115,18 +115,25 @@ export function UnitOverlapMatrix({ units, enrollments, students }: UnitOverlapM
   const exportPairTable = () => {
     let csvContent = 'CIHE PRE-ENROLMENT SYSTEM - UNIT PAIR OVERLAP TABLE\n';
     csvContent += `Generated: ${new Date().toLocaleString()}\n\n`;
-    csvContent += 'Unit A Code,Unit A Name,Unit B Code,Unit B Name,Common Students,Overlap Level\n';
+    csvContent += 'Unit A Code,Unit A Name,Unit B Code,Unit B Name,Common Students,Overlap Level,Student Names (CIHE ID)\n';
     const pairs: any[] = [];
     units.forEach(unitA => {
       units.forEach(unitB => {
         if (unitA.id < unitB.id) {
-          const count = matrix[unitA.id]?.[unitB.id]?.size || 0;
-          if (count > 0) pairs.push({ unitACode: unitA.unitCode, unitAName: unitA.name, unitBCode: unitB.unitCode, unitBName: unitB.name, count, level: getOverlapLevel(count, unitA.id, unitB.id) });
+          const set = matrix[unitA.id]?.[unitB.id];
+          const count = set?.size || 0;
+          if (count > 0) {
+            const emails = Array.from(set ?? new Set<string>()) as string[];
+            const studentList = getStudentDetails(emails)
+              .map(s => `${s.name} (${s.ciheId})`)
+              .join('; ');
+            pairs.push({ unitACode: unitA.unitCode, unitAName: unitA.name, unitBCode: unitB.unitCode, unitBName: unitB.name, count, level: getOverlapLevel(count, unitA.id, unitB.id), studentList });
+          }
         }
       });
     });
     pairs.sort((a, b) => b.count - a.count);
-    pairs.forEach(p => { csvContent += `${p.unitACode},"${p.unitAName}",${p.unitBCode},"${p.unitBName}",${p.count},${p.level}\n`; });
+    pairs.forEach(p => { csvContent += `${p.unitACode},"${p.unitAName}",${p.unitBCode},"${p.unitBName}",${p.count},${p.level},"${p.studentList}"\n`; });
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
