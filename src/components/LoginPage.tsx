@@ -189,6 +189,12 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                         <strong>Student:</strong> emma@cihe.edu (pwd: student123)
                       </p>
                       <p className="text-slate-700">
+                        <strong>Student:</strong> chris@cihe.edu (pwd: student123)
+                      </p>
+                      <p className="text-slate-700">
+                        <strong>Student:</strong> test1@cihe.edu (pwd: student123)
+                      </p>
+                      <p className="text-slate-700">
                         <strong>Admin:</strong> admin@cihe.edu (pwd: admin123)
                       </p>
                     </div>
