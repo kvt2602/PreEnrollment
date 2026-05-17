@@ -353,6 +353,14 @@ app.post('/api/preferences', async (req, res) => {
     return res.status(400).json({ message: 'Invalid time preference' });
   }
 
+  const [duplicateRows] = await pool.query(
+    'SELECT id FROM preferences WHERE student_email = ? AND course_id = ? LIMIT 1',
+    [studentEmail, courseId]
+  );
+  if (duplicateRows.length) {
+    return res.status(409).json({ message: 'Preference already exists for this course' });
+  }
+
   // Build a simple unique ID from the student, course, and submission time.
   const id = `${studentEmail}:${courseId}:${Date.now()}`;
   const submittedAt = new Date();
