@@ -6,6 +6,7 @@
 **Run date:** 17 May 2026  
 **Tester:** Local UAT run with Codex assistance  
 **Environment:** Localhost frontend and backend with MySQL `pre_enrolment`
+**Automated test suite:** `tests/test_api_uat.py`
 
 ## 1. UAT Objective
 
@@ -32,6 +33,7 @@ supports the main user workflows expected by students and administrators:
 | Student test account | `student@cihe.edu` / `student123` |
 | Browser/server check | Frontend returned HTTP 200 |
 | API health check | Backend returned `{"ok":true}` |
+| Python test command | `python -m pytest tests/test_api_uat.py -v` |
 
 ## 3. Test Data Used
 
@@ -53,6 +55,7 @@ created during UAT and deleted after the test run.
 |---|---:|
 | Passed after fix | 14 |
 | Failed after fix | 0 |
+| Pytest automated tests passed | 11 |
 | Defects found during first run | 1 |
 | Defects fixed and retested | 1 |
 
@@ -117,6 +120,24 @@ UAT-11 PASS - Student submits a new preference using UI time-slot value
 UAT-12 PASS - Duplicate preference is rejected
 UAT-13 PASS - Admin can update preference status
 UAT-14 PASS - Temporary preference cleanup
+```
+
+The same core workflows were also verified using Python `pytest`:
+
+```text
+tests/test_api_uat.py::test_health_endpoint_returns_ok PASSED
+tests/test_api_uat.py::test_admin_login_accepts_valid_credentials PASSED
+tests/test_api_uat.py::test_student_login_accepts_valid_credentials PASSED
+tests/test_api_uat.py::test_invalid_login_is_rejected PASSED
+tests/test_api_uat.py::test_courses_endpoint_returns_units PASSED
+tests/test_api_uat.py::test_student_list_endpoint_returns_students PASSED
+tests/test_api_uat.py::test_student_preferences_endpoint_returns_existing_preferences PASSED
+tests/test_api_uat.py::test_statistics_endpoint_returns_unit_statistics PASSED
+tests/test_api_uat.py::test_overlap_analysis_endpoint_returns_overlap_data PASSED
+tests/test_api_uat.py::test_preference_create_duplicate_reject_and_cleanup PASSED
+tests/test_api_uat.py::test_admin_can_update_preference_status_and_cleanup PASSED
+
+11 passed in 1.48s
 ```
 
 ## 9. User Acceptance Feedback
