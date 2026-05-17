@@ -96,6 +96,24 @@ npm run api:dev
 npm run api:start
 ```
 
+## Python tests
+
+This repository includes Python tests in the `test/` folder.
+
+Install test dependencies and run pytest:
+
+```bash
+python -m pip install -r requirements.txt
+python -m pytest -q
+```
+
+If the backend API is not running on the default host/port, set:
+
+```bash
+set PREENROLLMENT_API_BASE=http://localhost:4000
+python -m pytest -q
+```
+
 ## Core Rules Enforced
 
 - Maximum 30 students per class

@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 import subprocess
 import time
 from pathlib import Path
@@ -49,6 +50,10 @@ def api_is_running():
         return False
 
 
+def node_executable():
+    return shutil.which("node") or "node"
+
+
 @pytest.fixture(scope="session", autouse=True)
 def api_server():
     if api_is_running():
@@ -56,7 +61,7 @@ def api_server():
         return
 
     process = subprocess.Popen(
-        ["npm", "run", "api:start"],
+        [node_executable(), "backend/src/server.js"],
         cwd=ROOT,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
